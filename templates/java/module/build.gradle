@@ -12,6 +12,6 @@ dependencies {
 
 jar {
     archiveBaseName = '{{ .CurrentModule.Name }}'
-    archiveVersion = '1.0.0'
+    archiveVersion = '{{ .CurrentModule.Version }}'
     destinationDirectory = file("$buildDir/libs")
 }
