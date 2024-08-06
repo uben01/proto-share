@@ -1,0 +1,17 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.google.protobuf:protobuf-java:4.27.2'
+}
+
+jar {
+    archiveBaseName = '{{ .CurrentModule.Name }}'
+    archiveVersion = '1.0.0'
+    destinationDirectory = file("$buildDir/libs")
+}

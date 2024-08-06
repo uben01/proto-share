@@ -1,0 +1,16 @@
+plugins {
+    id 'groovy'
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.codehaus.groovy:groovy:3.0.9'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_{{ .JavaVersion }}
+}

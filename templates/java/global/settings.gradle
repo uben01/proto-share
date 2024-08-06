@@ -1,0 +1,5 @@
+rootProject.name = '{{ .ProjectName }}'
+
+{{- range .Modules }}
+include '{{ .Name }}'
+{{- end }}
