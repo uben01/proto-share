@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	. "proto-share/src/languages"
+	"strings"
 )
 
 type TemplateData struct {
@@ -41,18 +43,20 @@ func main() {
 	}
 
 	for _, module := range modules {
-		languageOutArgs := ""
+		var languageOutArgs []string
 
 		for _, language := range optInLanguages {
-			err := os.MkdirAll(fmt.Sprintf("%s/%s/%s/%s/%s", outDir, language.SubDir(), language.ModulePath(), module.Name, language.ProtoOutputDir()), os.ModePerm)
+			err := os.MkdirAll(filepath.Join(outDir, language.SubDir(), language.ModulePath(), module.Name, language.ProtoOutputDir()), os.ModePerm)
 			if err != nil {
 				panic(err)
 			}
 
-			languageOutArgs += fmt.Sprintf(" --%s=%s/%s/%s/%s/%s", language.ProtocCommand(), outDir, language.SubDir(), language.ModulePath(), module.Name, language.ProtoOutputDir())
+			languageProtoOutDir := filepath.Join(outDir, language.SubDir(), language.ModulePath(), module.Name, language.ProtoOutputDir())
+			languageOutArgs = append(languageOutArgs, fmt.Sprintf("--%s=%s", language.ProtocCommand(), languageProtoOutDir))
 		}
 
-		cmdStr := fmt.Sprintf("protoc %s -I %s %s/%s/*.proto", languageOutArgs, inDir, inDir, module.Path)
+		protoPathForModule := filepath.Join(inDir, module.Path, "*.proto")
+		cmdStr := fmt.Sprintf("protoc %s -I %s %s", strings.Join(languageOutArgs, " "), inDir, protoPathForModule)
 		cmd := exec.Command("sh", "-c", cmdStr)
 		output, err := cmd.CombinedOutput()
 		if err != nil {
