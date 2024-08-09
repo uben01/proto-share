@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+
 	. "proto-share/src/compiler"
 	. "proto-share/src/module"
 	. "proto-share/src/param"
@@ -8,7 +10,13 @@ import (
 )
 
 func main() {
-	params, err := ParseParams("example/proto-share.config.yml")
+	configPath := flag.String("config", "", "Path to the configuration file. If not provided, read from stdin.")
+	flag.Parse()
+	if *configPath == "" {
+		*configPath = "/dev/stdin"
+	}
+
+	params, err := ParseParams(*configPath)
 	if err != nil {
 		panic(err)
 	}
