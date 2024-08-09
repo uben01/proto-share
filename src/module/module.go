@@ -1,9 +1,10 @@
-package main
+package module
 
 import (
-	"gopkg.in/yaml.v2"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/yaml.v2"
 )
 
 type Module struct {
@@ -11,6 +12,24 @@ type Module struct {
 	Hash    string `yaml:"hash"`
 	Version int    `yaml:"version"`
 	Path    string `yaml:"path"`
+}
+
+func GetAllModules(root string) ([]*Module, error) {
+	files, err := findModuleYmlFiles(root)
+	if err != nil {
+		return nil, err
+	}
+
+	var modules []*Module
+	for _, file := range files {
+		module, err := readAndParseModuleYml(file)
+		if err != nil {
+			return nil, err
+		}
+		modules = append(modules, module)
+	}
+
+	return modules, nil
 }
 
 func findModuleYmlFiles(root string) ([]string, error) {
@@ -40,22 +59,4 @@ func readAndParseModuleYml(filePath string) (*Module, error) {
 	}
 
 	return &module, nil
-}
-
-func getAllModules(root string) ([]*Module, error) {
-	files, err := findModuleYmlFiles(root)
-	if err != nil {
-		return nil, err
-	}
-
-	var modules []*Module
-	for _, file := range files {
-		module, err := readAndParseModuleYml(file)
-		if err != nil {
-			return nil, err
-		}
-		modules = append(modules, module)
-	}
-
-	return modules, nil
 }

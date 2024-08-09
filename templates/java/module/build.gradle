@@ -11,7 +11,12 @@ dependencies {
 }
 
 jar {
-    archiveBaseName = '{{ .CurrentModule.Name }}'
-    archiveVersion = '{{ .CurrentModule.Version }}'
-    destinationDirectory = file("$buildDir/libs")
+    archiveBaseName = '{{ .Module.Name }}'
+    archiveVersion = '{{ .Module.Version }}'
+
+    {{- range .Languages }}
+    {{- if eq .Name "java" }}
+    destinationDirectory = file("{{ .AdditionalParams.jarPath }}")
+    {{- end }}
+    {{- end }}
 }
