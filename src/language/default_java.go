@@ -2,7 +2,6 @@ package language
 
 func DefaultJava() LanguageParam {
 	return LanguageParam{
-		Name:           Java,
 		SubDir:         "java",
 		ModulePath:     ".",
 		ProtoOutputDir: "src/main/java",

@@ -11,10 +11,10 @@ import (
 )
 
 type Param struct {
-	ProjectName string          `yaml:"projectName"`
-	InDir       string          `yaml:"inDir"`
-	OutDir      string          `yaml:"outDir"`
-	Languages   []LanguageParam `yaml:"languages"`
+	ProjectName string                     `yaml:"projectName"`
+	InDir       string                     `yaml:"inDir"`
+	OutDir      string                     `yaml:"outDir"`
+	Languages   map[Language]LanguageParam `yaml:"languages"`
 
 	Modules []*Module
 }
@@ -28,14 +28,14 @@ func ParseParams(configPath string) (*Param, error) {
 	var params Param
 	err = yaml.Unmarshal(data, &params)
 
-	var languages []LanguageParam
-	for _, language := range params.Languages {
-		switch language.Name {
+	var languages = make(map[Language]LanguageParam, len(params.Languages))
+	for languageName, language := range params.Languages {
+		switch languageName {
 		case Java:
 			lang := MergeWithDefault(language, DefaultJava())
-			languages = append(languages, lang)
+			languages[languageName] = lang
 		default:
-			return nil, fmt.Errorf("unsupported language: %s", language.Name)
+			return nil, fmt.Errorf("unsupported language: %s", languageName)
 		}
 	}
 

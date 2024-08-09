@@ -9,7 +9,6 @@ const (
 )
 
 type LanguageParam struct {
-	Name             Language          `yaml:"name"`
 	SubDir           string            `yaml:"subDirName"`
 	ModulePath       string            `yaml:"modulePath"`
 	ProtoOutputDir   string            `yaml:"protoOutputDir"`

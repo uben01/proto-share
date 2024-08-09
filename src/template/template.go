@@ -12,7 +12,7 @@ import (
 func GenerateTemplates(params *Param, modules []*Module) error {
 	templateParam := TemplateParam{Param: params}
 
-	for _, language := range params.Languages {
+	for languageName, language := range params.Languages {
 		templateParam.Language = &language
 
 		languageOutputPath := filepath.Join(params.OutDir, language.SubDir)
@@ -28,13 +28,13 @@ func GenerateTemplates(params *Param, modules []*Module) error {
 			}
 		}
 
-		templateLanguageRoot := filepath.Join("templates", language.SubDir, "global")
+		templateLanguageRoot := filepath.Join("templates", string(languageName), "global")
 		err = renderTemplates(templateLanguageRoot, languageOutputPath, templateParam)
 		if err != nil {
 			return err
 		}
 
-		templateLanguageModuleRoot := filepath.Join("templates", language.SubDir, "module")
+		templateLanguageModuleRoot := filepath.Join("templates", string(languageName), "module")
 		for _, module := range modules {
 			templateParam.Module = module
 
