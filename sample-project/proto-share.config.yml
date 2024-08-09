@@ -1,0 +1,5 @@
+projectName: "myProject"
+inDir: "sample-project/proto"
+outDir: "sample-project/out"
+languages:
+  - name: java

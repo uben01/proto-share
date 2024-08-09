@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package car_sharing;
+
+// Car message definition
+message Car {
+  string id = 1; // Unique identifier for the car
+  string make = 2; // Make of the car
+  string model = 3; // Model of the car
+  int32 year = 4; // Year of manufacture
+  string license_plate = 5; // License plate number
+  string color = 6; // Color of the car
+}

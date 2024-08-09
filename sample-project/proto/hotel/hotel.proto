@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package hotel;
+
+import "hotel/room.proto";
+
+// Hotel message definition
+message Hotel {
+  string id = 1; // Unique identifier for the hotel
+  string name = 2; // Name of the hotel
+  string address = 3; // Address of the hotel
+  string city = 4; // City where the hotel is located
+  string state = 5; // State where the hotel is located
+  string country = 6; // Country where the hotel is located
+  int32 star_rating = 7; // Star rating of the hotel
+  repeated Room rooms = 8; // List of rooms in the hotel
+}

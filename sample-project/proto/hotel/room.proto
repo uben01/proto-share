@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package hotel;
+
+// Room message definition
+message Room {
+  string id = 1; // Unique identifier for the room
+  string type = 2; // Type of the room (e.g., single, double, suite)
+  int32 capacity = 3; // Capacity of the room
+  double price_per_night = 4; // Price per night for the room
+}

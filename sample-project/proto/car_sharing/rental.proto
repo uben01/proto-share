@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package car_sharing;
+
+import "car_sharing/car.proto";
+
+// Rental message definition
+message Rental {
+  string id = 1; // Unique identifier for the rental
+  Car car = 2; // Car being rented
+  string user_id = 3; // ID of the user renting the car
+  string start_time = 4; // Start time of the rental
+  string end_time = 5; // End time of the rental
+  double price = 6; // Price of the rental
+}
