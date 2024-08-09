@@ -1,7 +1,9 @@
 package template
 
 import (
-	"os"
+	"embed"
+	"io/fs"
+	. "os"
 	"path/filepath"
 	"text/template"
 
@@ -9,37 +11,39 @@ import (
 	. "proto-share/src/param"
 )
 
-func GenerateTemplates(params *Param, modules []*Module) error {
+var templateRoot = filepath.Join("build", "templates")
+
+func GenerateTemplates(embedFileSystem embed.FS, params *Param, modules []*Module) error {
 	templateParam := TemplateParam{Param: params}
 
 	for languageName, language := range params.Languages {
 		templateParam.Language = &language
 
 		languageOutputPath := filepath.Join(params.OutDir, language.SubDir)
-		err := os.MkdirAll(languageOutputPath, os.ModePerm)
+		err := MkdirAll(languageOutputPath, ModePerm)
 		if err != nil {
 			return err
 		}
 
 		for _, module := range modules {
-			err := os.MkdirAll(filepath.Join(languageOutputPath, language.ModulePath, module.Name), os.ModePerm)
+			err := MkdirAll(filepath.Join(languageOutputPath, language.ModulePath, module.Name), ModePerm)
 			if err != nil {
 				return err
 			}
 		}
 
-		templateLanguageRoot := filepath.Join("templates", string(languageName), "global")
-		err = renderTemplates(templateLanguageRoot, languageOutputPath, templateParam)
+		templateLanguageRoot := filepath.Join(templateRoot, string(languageName), "global")
+		err = renderTemplates(embedFileSystem, templateLanguageRoot, languageOutputPath, templateParam)
 		if err != nil {
 			return err
 		}
 
-		templateLanguageModuleRoot := filepath.Join("templates", string(languageName), "module")
+		templateLanguageModuleRoot := filepath.Join(templateRoot, string(languageName), "module")
 		for _, module := range modules {
 			templateParam.Module = module
 
 			moduleOutputPath := filepath.Join(params.OutDir, language.SubDir, language.ModulePath, module.Name)
-			err = renderTemplates(templateLanguageModuleRoot, moduleOutputPath, templateParam)
+			err = renderTemplates(embedFileSystem, templateLanguageModuleRoot, moduleOutputPath, templateParam)
 
 			if err != nil {
 				return err
@@ -49,18 +53,18 @@ func GenerateTemplates(params *Param, modules []*Module) error {
 	return nil
 }
 
-func renderTemplates(from string, to string, templateParam TemplateParam) error {
-	return filepath.WalkDir(from, func(path string, d os.DirEntry, err error) error {
+func renderTemplates(embedFileSystem embed.FS, from string, to string, templateParam TemplateParam) error {
+	return fs.WalkDir(embedFileSystem, from, func(path string, d DirEntry, err error) error {
 		if d.IsDir() {
 			if path == from {
 				return nil
 			}
 
-			err = os.MkdirAll(filepath.Join(to, d.Name()), os.ModePerm)
+			err = MkdirAll(filepath.Join(to, d.Name()), ModePerm)
 			if err != nil {
 				return err
 			}
-			err = renderTemplates(path, filepath.Join(to, d.Name()), templateParam)
+			err = renderTemplates(embedFileSystem, path, filepath.Join(to, d.Name()), templateParam)
 			if err != nil {
 				return err
 			}
@@ -69,12 +73,13 @@ func renderTemplates(from string, to string, templateParam TemplateParam) error 
 		}
 
 		outputPath := filepath.Join(to, d.Name())
-		t := template.Must(template.ParseFiles(path))
+
+		t := template.Must(template.ParseFS(embedFileSystem, path))
 		if err != nil {
 			return err
 		}
 
-		file, err := os.Create(outputPath)
+		file, err := Create(outputPath)
 		if err != nil {
 			return err
 		}

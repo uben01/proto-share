@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"flag"
 
 	. "proto-share/src/compiler"
@@ -8,6 +9,11 @@ import (
 	. "proto-share/src/param"
 	. "proto-share/src/template"
 )
+
+//go:generate mkdir -p build
+//go:generate cp -RL ../templates build
+//go:embed build/templates
+var embedFileSystem embed.FS
 
 func main() {
 	configPath := flag.String("config", "", "Path to the configuration file. If not provided, read from stdin.")
@@ -27,7 +33,7 @@ func main() {
 	}
 	params.Modules = modules
 
-	err = GenerateTemplates(params, modules)
+	err = GenerateTemplates(embedFileSystem, params, modules)
 	if err != nil {
 		panic(err)
 	}
