@@ -7,12 +7,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	. "proto-share/src/module"
 	. "proto-share/src/param"
 )
 
-func CompileModules(modules []*Module, param *Param) error {
-	for _, module := range modules {
+func CompileModules(param *Param) error {
+	for _, module := range param.Modules {
 		var languageOutArgs []string
 
 		for _, language := range param.Languages {

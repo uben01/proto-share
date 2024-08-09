@@ -7,13 +7,12 @@ import (
 	"path/filepath"
 	"text/template"
 
-	. "proto-share/src/module"
 	. "proto-share/src/param"
 )
 
 var templateRoot = filepath.Join("build", "templates")
 
-func GenerateTemplates(embedFileSystem embed.FS, params *Param, modules []*Module) error {
+func GenerateTemplates(embedFileSystem embed.FS, params *Param) error {
 	templateParam := TemplateParam{Param: params}
 
 	for languageName, language := range params.Languages {
@@ -25,7 +24,7 @@ func GenerateTemplates(embedFileSystem embed.FS, params *Param, modules []*Modul
 			return err
 		}
 
-		for _, module := range modules {
+		for _, module := range params.Modules {
 			err := MkdirAll(filepath.Join(languageOutputPath, language.ModulePath, module.Name), ModePerm)
 			if err != nil {
 				return err
@@ -39,7 +38,7 @@ func GenerateTemplates(embedFileSystem embed.FS, params *Param, modules []*Modul
 		}
 
 		templateLanguageModuleRoot := filepath.Join(templateRoot, string(languageName), "module")
-		for _, module := range modules {
+		for _, module := range params.Modules {
 			templateParam.Module = module
 
 			moduleOutputPath := filepath.Join(params.OutDir, language.SubDir, language.ModulePath, module.Name)

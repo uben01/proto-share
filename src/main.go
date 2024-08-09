@@ -33,13 +33,15 @@ func main() {
 	}
 	params.Modules = modules
 
-	err = GenerateTemplates(embedFileSystem, params, modules)
-	if err != nil {
+	if err = GenerateTemplates(embedFileSystem, params); err != nil {
 		panic(err)
 	}
 
-	err = CompileModules(modules, params)
-	if err != nil {
+	if err = CompileModules(params); err != nil {
+		panic(err)
+	}
+
+	if err = UpdateMD5Hash(params.Modules, params.InDir); err != nil {
 		panic(err)
 	}
 }

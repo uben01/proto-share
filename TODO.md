@@ -1,6 +1,5 @@
 # TODO
 
-- [ ] Use module.yml to schema versioning
 - [ ] Make templates bundled into binary
 - [ ] Test the functionality
 - [ ] Create documentation
