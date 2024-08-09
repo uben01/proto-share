@@ -8,7 +8,7 @@ const (
 	Java Language = "java"
 )
 
-type LanguageParams struct {
+type LanguageParam struct {
 	Name             Language          `yaml:"name"`
 	SubDir           string            `yaml:"subDirName"`
 	ModulePath       string            `yaml:"modulePath"`
@@ -17,7 +17,7 @@ type LanguageParams struct {
 	AdditionalParams map[string]string `yaml:"additionalParams"`
 }
 
-func MergeWithDefault(actual LanguageParams, defaultLang LanguageParams) LanguageParams {
+func MergeWithDefault(actual LanguageParam, defaultLang LanguageParam) LanguageParam {
 	merged := actual
 	defaultVal := reflect.ValueOf(defaultLang)
 	mergedVal := reflect.ValueOf(&merged).Elem()

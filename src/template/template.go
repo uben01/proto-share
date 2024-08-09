@@ -10,7 +10,11 @@ import (
 )
 
 func GenerateTemplates(params *Param, modules []*Module) error {
+	templateParam := TemplateParam{Param: params}
+
 	for _, language := range params.Languages {
+		templateParam.Language = &language
+
 		languageOutputPath := filepath.Join(params.OutDir, language.SubDir)
 		err := os.MkdirAll(languageOutputPath, os.ModePerm)
 		if err != nil {
@@ -25,16 +29,17 @@ func GenerateTemplates(params *Param, modules []*Module) error {
 		}
 
 		templateLanguageRoot := filepath.Join("templates", language.SubDir, "global")
-		err = renderTemplates(templateLanguageRoot, languageOutputPath, params)
+		err = renderTemplates(templateLanguageRoot, languageOutputPath, templateParam)
 		if err != nil {
 			return err
 		}
 
 		templateLanguageModuleRoot := filepath.Join("templates", language.SubDir, "module")
 		for _, module := range modules {
-			params.Module = module
+			templateParam.Module = module
+
 			moduleOutputPath := filepath.Join(params.OutDir, language.SubDir, language.ModulePath, module.Name)
-			err = renderTemplates(templateLanguageModuleRoot, moduleOutputPath, params)
+			err = renderTemplates(templateLanguageModuleRoot, moduleOutputPath, templateParam)
 
 			if err != nil {
 				return err
@@ -44,7 +49,7 @@ func GenerateTemplates(params *Param, modules []*Module) error {
 	return nil
 }
 
-func renderTemplates(from string, to string, templateData interface{}) error {
+func renderTemplates(from string, to string, templateParam TemplateParam) error {
 	return filepath.WalkDir(from, func(path string, d os.DirEntry, err error) error {
 		if d.IsDir() {
 			if path == from {
@@ -55,7 +60,7 @@ func renderTemplates(from string, to string, templateData interface{}) error {
 			if err != nil {
 				return err
 			}
-			err = renderTemplates(path, filepath.Join(to, d.Name()), templateData)
+			err = renderTemplates(path, filepath.Join(to, d.Name()), templateParam)
 			if err != nil {
 				return err
 			}
@@ -74,7 +79,7 @@ func renderTemplates(from string, to string, templateData interface{}) error {
 			return err
 		}
 
-		err = t.Execute(file, templateData)
+		err = t.Execute(file, templateParam)
 		if err != nil {
 			return err
 		}

@@ -14,9 +14,5 @@ jar {
     archiveBaseName = '{{ .Module.Name }}'
     archiveVersion = '{{ .Module.Version }}'
 
-    {{- range .Languages }}
-    {{- if eq .Name "java" }}
-    destinationDirectory = file("{{ .AdditionalParams.jarPath }}")
-    {{- end }}
-    {{- end }}
+    destinationDirectory = file("{{ .Language.AdditionalParams.jarPath }}")
 }

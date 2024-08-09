@@ -1,7 +1,7 @@
 package language
 
-func DefaultJava() LanguageParams {
-	return LanguageParams{
+func DefaultJava() LanguageParam {
+	return LanguageParam{
 		Name:           Java,
 		SubDir:         "java",
 		ModulePath:     ".",

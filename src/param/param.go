@@ -11,12 +11,11 @@ import (
 )
 
 type Param struct {
-	ProjectName string           `yaml:"projectName"`
-	InDir       string           `yaml:"inDir"`
-	OutDir      string           `yaml:"outDir"`
-	Languages   []LanguageParams `yaml:"languages"`
+	ProjectName string          `yaml:"projectName"`
+	InDir       string          `yaml:"inDir"`
+	OutDir      string          `yaml:"outDir"`
+	Languages   []LanguageParam `yaml:"languages"`
 
-	Module  *Module
 	Modules []*Module
 }
 
@@ -29,7 +28,7 @@ func ParseParams(configPath string) (*Param, error) {
 	var params Param
 	err = yaml.Unmarshal(data, &params)
 
-	var languages []LanguageParams
+	var languages []LanguageParam
 	for _, language := range params.Languages {
 		switch language.Name {
 		case Java:

@@ -11,10 +11,6 @@ dependencies {
     implementation 'org.codehaus.groovy:groovy:3.0.9'
 }
 
-{{- range .Languages }}
-{{- if eq .Name "java" }}
 java {
-    sourceCompatibility = JavaVersion.VERSION_{{ .AdditionalParams.version }}
+    sourceCompatibility = JavaVersion.VERSION_{{ .Language.AdditionalParams.version }}
 }
-{{- end }}
-{{- end }}
