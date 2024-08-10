@@ -1,5 +1,5 @@
-rootProject.name = '{{ .Param.ProjectName }}'
+rootProject.name = '{{ .Config.ProjectName }}'
 
-{{- range .Param.Modules }}
+{{- range .Config.Modules }}
 include '{{ .Name }}'
 {{- end }}

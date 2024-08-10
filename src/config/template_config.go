@@ -1,12 +1,12 @@
-package param
+package config
 
 import (
 	. "proto-share/src/language"
 	. "proto-share/src/module"
 )
 
-type TemplateParam struct {
-	Param    *Param
+type TemplateConfig struct {
+	Config   *Config
 	Module   *Module
-	Language *LanguageParam
+	Language *LanguageConfig
 }

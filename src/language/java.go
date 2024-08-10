@@ -1,12 +1,12 @@
 package language
 
-func DefaultJava() LanguageParam {
-	return LanguageParam{
+func DefaultJava() LanguageConfig {
+	return LanguageConfig{
 		SubDir:         "java",
 		ModulePath:     ".",
 		ProtoOutputDir: "src/main/java",
 		ProtocCommand:  "java_out",
-		AdditionalParams: map[string]string{
+		AdditionalParameters: map[string]string{
 			"version": "21",
 			"jarPath": "${rootDir}/build/libs",
 		},

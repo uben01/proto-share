@@ -12,5 +12,5 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_{{ .Language.AdditionalParams.version }}
+    sourceCompatibility = JavaVersion.VERSION_{{ .Language.AdditionalParameters.version }}
 }

@@ -8,17 +8,20 @@ const (
 	Java Language = "java"
 )
 
-type LanguageParam struct {
-	SubDir           string            `yaml:"subDirName"`
-	ModulePath       string            `yaml:"modulePath"`
-	ProtoOutputDir   string            `yaml:"protoOutputDir"`
-	ProtocCommand    string            `yaml:"protocCommand"`
-	AdditionalParams map[string]string `yaml:"additionalParams"`
+type LanguageConfig struct {
+	SubDir               string            `yaml:"subDirName"`
+	ModulePath           string            `yaml:"modulePath"`
+	ProtoOutputDir       string            `yaml:"protoOutputDir"`
+	ProtocCommand        string            `yaml:"protocCommand"`
+	AdditionalParameters map[string]string `yaml:"additionalParameters"`
 }
 
-func MergeWithDefault(actual LanguageParam, defaultLang LanguageParam) LanguageParam {
-	merged := actual
-	defaultVal := reflect.ValueOf(defaultLang)
+func MergeWithDefault(
+	actualLanguageConfig LanguageConfig,
+	defaultLanguageConfig LanguageConfig,
+) LanguageConfig {
+	merged := actualLanguageConfig
+	defaultVal := reflect.ValueOf(defaultLanguageConfig)
 	mergedVal := reflect.ValueOf(&merged).Elem()
 
 	for i := 0; i < defaultVal.NumField(); i++ {

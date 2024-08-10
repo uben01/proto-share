@@ -5,8 +5,8 @@ import (
 	"flag"
 
 	. "proto-share/src/compiler"
+	. "proto-share/src/config"
 	. "proto-share/src/module"
-	. "proto-share/src/param"
 	. "proto-share/src/template"
 )
 
@@ -22,26 +22,26 @@ func main() {
 		*configPath = "/dev/stdin"
 	}
 
-	params, err := ParseParams(*configPath)
+	config, err := ParseConfig(*configPath)
 	if err != nil {
 		panic(err)
 	}
 
-	modules, err := GetAllModules(params.InDir)
+	modules, err := GetAllModules(config.InDir)
 	if err != nil {
 		panic(err)
 	}
-	params.Modules = modules
+	config.Modules = modules
 
-	if err = GenerateTemplates(embedFileSystem, params); err != nil {
+	if err = GenerateTemplates(embedFileSystem, config); err != nil {
 		panic(err)
 	}
 
-	if err = CompileModules(params); err != nil {
+	if err = CompileModules(config); err != nil {
 		panic(err)
 	}
 
-	if err = UpdateMD5Hash(params.Modules, params.InDir); err != nil {
+	if err = UpdateMD5Hash(config.Modules, config.InDir); err != nil {
 		panic(err)
 	}
 }

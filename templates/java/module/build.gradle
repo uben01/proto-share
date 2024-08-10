@@ -14,5 +14,5 @@ jar {
     archiveBaseName = '{{ .Module.Name }}'
     archiveVersion = '{{ .Module.Version }}'
 
-    destinationDirectory = file("{{ .Language.AdditionalParams.jarPath }}")
+    destinationDirectory = file("{{ .Language.AdditionalParameters.jarPath }}")
 }
