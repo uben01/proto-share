@@ -1,6 +1,5 @@
 # TODO
 
-- [ ] Make templates bundled into binary
 - [ ] Test the functionality
 - [ ] Create documentation
 - [ ] Handle dependency between modules
