@@ -16,7 +16,7 @@ func GenerateTemplates(embedFileSystem embed.FS, config *Config) error {
 	templateConfig := TemplateConfig{Config: config}
 
 	for languageName, language := range config.Languages {
-		templateConfig.Language = &language
+		templateConfig.Language = language
 
 		languageOutputPath := filepath.Join(config.OutDir, language.SubDir)
 		if err := MkdirAll(languageOutputPath, ModePerm); err != nil {

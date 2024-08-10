@@ -23,16 +23,22 @@ var defaultMapping = map[Language]*LanguageConfig{
 	Java: defaultJava(),
 }
 
-func MergeWithDefault(languageName Language, actualLanguageConfig LanguageConfig) (*LanguageConfig, error) {
+func MergeWithDefault(languageName Language, actualLanguageConfig *LanguageConfig) (*LanguageConfig, error) {
 	defaultLanguageConfig := defaultMapping[languageName]
 
 	if defaultLanguageConfig == nil {
 		return nil, fmt.Errorf("unsupported language: %s", languageName)
 	}
 
-	merged := actualLanguageConfig
+	var merged *LanguageConfig
+	if actualLanguageConfig != nil {
+		merged = actualLanguageConfig
+	} else {
+		merged = &LanguageConfig{}
+	}
+
 	defaultVal := reflect.ValueOf(*defaultLanguageConfig)
-	mergedVal := reflect.ValueOf(&merged).Elem()
+	mergedVal := reflect.ValueOf(merged).Elem()
 
 	for i := 0; i < defaultVal.NumField(); i++ {
 		field := defaultVal.Type().Field(i)
@@ -44,7 +50,7 @@ func MergeWithDefault(languageName Language, actualLanguageConfig LanguageConfig
 		}
 	}
 
-	return &merged, nil
+	return merged, nil
 }
 
 func isEmptyValue(v reflect.Value) bool {
