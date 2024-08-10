@@ -1,6 +1,9 @@
 package language
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
 
 type Language string
 
@@ -16,12 +19,19 @@ type LanguageConfig struct {
 	AdditionalParameters map[string]string `yaml:"additionalParameters"`
 }
 
-func MergeWithDefault(
-	actualLanguageConfig LanguageConfig,
-	defaultLanguageConfig LanguageConfig,
-) LanguageConfig {
+var defaultMapping = map[Language]*LanguageConfig{
+	Java: defaultJava(),
+}
+
+func MergeWithDefault(languageName Language, actualLanguageConfig LanguageConfig) (*LanguageConfig, error) {
+	defaultLanguageConfig := defaultMapping[languageName]
+
+	if defaultLanguageConfig == nil {
+		return nil, fmt.Errorf("unsupported language: %s", languageName)
+	}
+
 	merged := actualLanguageConfig
-	defaultVal := reflect.ValueOf(defaultLanguageConfig)
+	defaultVal := reflect.ValueOf(*defaultLanguageConfig)
 	mergedVal := reflect.ValueOf(&merged).Elem()
 
 	for i := 0; i < defaultVal.NumField(); i++ {
@@ -34,7 +44,7 @@ func MergeWithDefault(
 		}
 	}
 
-	return merged
+	return &merged, nil
 }
 
 func isEmptyValue(v reflect.Value) bool {

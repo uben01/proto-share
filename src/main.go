@@ -6,7 +6,7 @@ import (
 
 	. "proto-share/src/compiler"
 	. "proto-share/src/config"
-	. "proto-share/src/module"
+	. "proto-share/src/config/module"
 	. "proto-share/src/template"
 )
 

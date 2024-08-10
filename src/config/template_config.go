@@ -1,8 +1,8 @@
 package config
 
 import (
-	. "proto-share/src/language"
-	. "proto-share/src/module"
+	. "proto-share/src/config/language"
+	. "proto-share/src/config/module"
 )
 
 type TemplateConfig struct {

@@ -1,13 +1,12 @@
 package config
 
 import (
-	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v2"
 
-	. "proto-share/src/language"
-	. "proto-share/src/module"
+	. "proto-share/src/config/language"
+	. "proto-share/src/config/module"
 )
 
 type Config struct {
@@ -28,18 +27,16 @@ func ParseConfig(configPath string) (*Config, error) {
 	var config Config
 	err = yaml.Unmarshal(data, &config)
 
-	var languages = make(map[Language]LanguageConfig, len(config.Languages))
-	for languageName, language := range config.Languages {
-		switch languageName {
-		case Java:
-			lang := MergeWithDefault(language, DefaultJava())
-			languages[languageName] = lang
-		default:
-			return nil, fmt.Errorf("unsupported language: %s", languageName)
+	var mergedLanguages = make(map[Language]LanguageConfig, len(config.Languages))
+	for languageName, languageConfig := range config.Languages {
+		lang, err := MergeWithDefault(languageName, languageConfig)
+		if err != nil {
+			return nil, err
 		}
+		mergedLanguages[languageName] = *lang
 	}
 
-	config.Languages = languages
+	config.Languages = mergedLanguages
 
 	return &config, err
 }
