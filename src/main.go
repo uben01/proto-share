@@ -33,7 +33,8 @@ func main() {
 	}
 	config.Modules = modules
 
-	if err = GenerateTemplates(embedFileSystem, config); err != nil {
+	renderConfig := &RenderConfig{Config: config}
+	if err = GenerateTemplates(embedFileSystem, renderConfig); err != nil {
 		panic(err)
 	}
 

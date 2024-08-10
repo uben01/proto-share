@@ -5,13 +5,13 @@ import (
 	"reflect"
 )
 
-type Language string
+type Name string
 
 const (
-	Java Language = "java"
+	Java Name = "java"
 )
 
-type LanguageConfig struct {
+type Config struct {
 	SubDir               string            `yaml:"subDirName"`
 	ModulePath           string            `yaml:"modulePath"`
 	ProtoOutputDir       string            `yaml:"protoOutputDir"`
@@ -19,22 +19,22 @@ type LanguageConfig struct {
 	AdditionalParameters map[string]string `yaml:"additionalParameters"`
 }
 
-var defaultMapping = map[Language]*LanguageConfig{
+var defaultMapping = map[Name]*Config{
 	Java: defaultJava(),
 }
 
-func MergeWithDefault(languageName Language, actualLanguageConfig *LanguageConfig) (*LanguageConfig, error) {
+func MergeWithDefault(languageName Name, actualLanguageConfig *Config) (*Config, error) {
 	defaultLanguageConfig := defaultMapping[languageName]
 
 	if defaultLanguageConfig == nil {
 		return nil, fmt.Errorf("unsupported language: %s", languageName)
 	}
 
-	var merged *LanguageConfig
+	var merged *Config
 	if actualLanguageConfig != nil {
 		merged = actualLanguageConfig
 	} else {
-		merged = &LanguageConfig{}
+		merged = &Config{}
 	}
 
 	defaultVal := reflect.ValueOf(*defaultLanguageConfig)
