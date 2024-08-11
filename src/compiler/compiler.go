@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	. "proto-share/src/config"
+	. "config"
 )
 
 func CompileModules(config *Config) error {

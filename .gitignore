@@ -16,4 +16,5 @@ fabric.properties
 *.test
 *.out
 go.work
+go.work.sum
 src/build

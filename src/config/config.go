@@ -5,8 +5,8 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"proto-share/src/config/language"
-	. "proto-share/src/config/module"
+	"config/language"
+	. "config/module"
 )
 
 type Config struct {

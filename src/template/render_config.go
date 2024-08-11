@@ -1,9 +1,9 @@
 package template
 
 import (
-	. "proto-share/src/config"
-	"proto-share/src/config/language"
-	. "proto-share/src/config/module"
+	. "config"
+	"config/language"
+	. "config/module"
 )
 
 type RenderConfig struct {

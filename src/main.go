@@ -4,10 +4,10 @@ import (
 	"embed"
 	"flag"
 
-	. "proto-share/src/compiler"
-	. "proto-share/src/config"
-	. "proto-share/src/config/module"
-	. "proto-share/src/template"
+	. "compiler"
+	. "config"
+	. "config/module"
+	. "template"
 )
 
 //go:generate mkdir -p build
