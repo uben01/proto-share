@@ -11,8 +11,16 @@ import (
 )
 
 func CompileModules(config *Config) error {
+	if len(config.Modules) == 0 {
+		return fmt.Errorf("no modules defined")
+	}
+
 	for _, module := range config.Modules {
 		var languageOutArgs []string
+
+		if len(config.Languages) == 0 {
+			return fmt.Errorf("no languages defined")
+		}
 
 		for _, language := range config.Languages {
 			err := os.MkdirAll(
