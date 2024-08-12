@@ -1,7 +1,7 @@
 package language
 
-func defaultJava() *Config {
-	return &Config{
+func defaultJava() *Language {
+	return &Language{
 		SubDir:         "java",
 		ModulePath:     ".",
 		ProtoOutputDir: "src/main/java",

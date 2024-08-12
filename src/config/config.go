@@ -5,15 +5,15 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"config/language"
+	. "config/language"
 	. "config/module"
 )
 
 type Config struct {
-	ProjectName string                             `yaml:"projectName"`
-	InDir       string                             `yaml:"inDir"`
-	OutDir      string                             `yaml:"outDir"`
-	Languages   map[language.Name]*language.Config `yaml:"languages"`
+	ProjectName string                     `yaml:"projectName"`
+	InDir       string                     `yaml:"inDir"`
+	OutDir      string                     `yaml:"outDir"`
+	Languages   map[LanguageName]*Language `yaml:"languages"`
 
 	Modules []*Module
 }
@@ -27,9 +27,9 @@ func ParseConfig(configPath string) (*Config, error) {
 	var config Config
 	err = yaml.Unmarshal(data, &config)
 
-	var mergedLanguages = make(map[language.Name]*language.Config, len(config.Languages))
+	var mergedLanguages = make(map[LanguageName]*Language, len(config.Languages))
 	for languageName, languageConfig := range config.Languages {
-		lang, err := language.MergeWithDefault(languageName, languageConfig)
+		lang, err := MergeWithDefault(languageName, languageConfig)
 		if err != nil {
 			return nil, err
 		}

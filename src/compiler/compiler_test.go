@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	. "config"
-	"config/language"
+	. "config/language"
 	. "config/module"
 )
 
@@ -20,7 +20,7 @@ var (
 		Path: "my/module",
 	}
 
-	testLanguage = language.Config{
+	testLanguage = Language{
 		SubDir:         "myLang",
 		ModulePath:     "myModuleGoesHere",
 		ProtoOutputDir: "src/main",
@@ -33,7 +33,7 @@ var (
 		Modules: []*Module{
 			&testModule,
 		},
-		Languages: map[language.Name]*language.Config{
+		Languages: map[LanguageName]*Language{
 			"myLang": &testLanguage,
 		},
 	}
@@ -55,7 +55,7 @@ func TestCompileModules_withoutLanguages_returnsError(t *testing.T) {
 		Modules: []*Module{
 			{},
 		},
-		Languages: map[language.Name]*language.Config{},
+		Languages: map[LanguageName]*Language{},
 	}
 
 	err := CompileModules(config)
