@@ -10,6 +10,12 @@ import (
 	. "config"
 )
 
+var (
+	mkdirAll       = os.MkdirAll
+	createCommand  = exec.Command
+	executeCommand = func(cmd *exec.Cmd) ([]byte, error) { return cmd.CombinedOutput() }
+)
+
 func CompileModules(config *Config) error {
 	if len(config.Modules) == 0 {
 		return fmt.Errorf("no modules defined")
@@ -23,7 +29,7 @@ func CompileModules(config *Config) error {
 		}
 
 		for _, language := range config.Languages {
-			err := os.MkdirAll(
+			err := mkdirAll(
 				filepath.Join(config.OutDir, language.SubDir, language.ModulePath, module.Name, language.ProtoOutputDir),
 				os.ModePerm,
 			)
@@ -51,8 +57,12 @@ func CompileModules(config *Config) error {
 			config.InDir,
 			protoPathForModule,
 		)
-		cmd := exec.Command("sh", "-c", cmdStr)
-		output, err := cmd.CombinedOutput()
+		cmd := createCommand("sh", "-c", cmdStr)
+		if cmd == nil {
+			return fmt.Errorf("failed to create command: %s", cmdStr)
+		}
+
+		output, err := executeCommand(cmd)
 		if err != nil {
 			fmt.Println(string(output))
 			return err
