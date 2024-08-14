@@ -1,0 +1,10 @@
+go 1.22.6
+
+use (
+	src/.
+	src/compiler
+	src/config
+	src/config/language
+	src/config/module
+	src/template
+)
