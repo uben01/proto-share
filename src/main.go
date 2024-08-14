@@ -33,6 +33,10 @@ func main() {
 	}
 	config.Modules = modules
 
+	if err = UpdateModulesVersion(config.Modules, config.InDir); err != nil {
+		panic(err)
+	}
+
 	renderConfig := &RenderConfig{Config: config}
 	if err = GenerateTemplates(embedFileSystem, renderConfig); err != nil {
 		panic(err)
@@ -42,7 +46,7 @@ func main() {
 		panic(err)
 	}
 
-	if err = UpdateMD5Hash(config.Modules, config.InDir); err != nil {
+	if err = WriteNewVersionToFile(config.Modules, config.InDir); err != nil {
 		panic(err)
 	}
 }

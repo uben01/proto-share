@@ -10,7 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func UpdateMD5Hash(modules []*Module, inDir string) error {
+func UpdateModulesVersion(modules []*Module, inDir string) error {
 	for _, module := range modules {
 		moduleRoot := filepath.Join(inDir, module.Path)
 		hash, err := computeModuleMD5Hash(moduleRoot)
@@ -21,16 +21,24 @@ func UpdateMD5Hash(modules []*Module, inDir string) error {
 		if hash != module.Hash {
 			module.Hash = hash
 			module.Version += 1
+		}
+	}
 
-			moduleConfigPath := filepath.Join(moduleRoot, "module.yml")
-			marshaledModule, err := yaml.Marshal(module)
-			if err != nil {
-				return err
-			}
+	return nil
+}
 
-			if err := os.WriteFile(moduleConfigPath, marshaledModule, 0666); err != nil {
-				return err
-			}
+func WriteNewVersionToFile(modules []*Module, inDir string) error {
+	for _, module := range modules {
+		moduleRoot := filepath.Join(inDir, module.Path)
+
+		moduleConfigPath := filepath.Join(moduleRoot, "module.yml")
+		marshaledModule, err := yaml.Marshal(module)
+		if err != nil {
+			return err
+		}
+
+		if err := os.WriteFile(moduleConfigPath, marshaledModule, 0666); err != nil {
+			return err
 		}
 	}
 
