@@ -2,9 +2,11 @@ package template
 
 import (
 	"embed"
+	"fmt"
 	"io/fs"
 	. "os"
 	"path/filepath"
+	"strings"
 	"text/template"
 )
 
@@ -28,7 +30,9 @@ func GenerateTemplates(embedFileSystem embed.FS, renderConfig *RenderConfig) err
 			}
 		}
 
-		templateLanguageRoot := filepath.Join(templateRoot, string(languageName), "global")
+		fmt.Printf("Generating templates for language: %s\n", languageName)
+
+		templateLanguageRoot := filepath.Join(templateRoot, strings.ToLower(string(languageName)), "global")
 		if err := renderTemplates(
 			embedFileSystem,
 			templateLanguageRoot,
@@ -38,9 +42,11 @@ func GenerateTemplates(embedFileSystem embed.FS, renderConfig *RenderConfig) err
 			return err
 		}
 
-		templateLanguageModuleRoot := filepath.Join(templateRoot, string(languageName), "module")
+		templateLanguageModuleRoot := filepath.Join(templateRoot, strings.ToLower(string(languageName)), "module")
 		for _, module := range renderConfig.Config.Modules {
 			renderConfig.Module = module
+
+			fmt.Printf("  Generating templates for module: %s\n", module.Name)
 
 			moduleOutputPath := filepath.Join(renderConfig.Config.OutDir, language.SubDir, language.ModulePath, module.Name)
 			if err := renderTemplates(

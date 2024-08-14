@@ -3,6 +3,7 @@ package module
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -21,6 +22,8 @@ func UpdateModulesVersion(modules []*Module, inDir string) error {
 		if hash != module.Hash {
 			module.Hash = hash
 			module.Version += 1
+
+			fmt.Printf("Module %s has changed. New version: %d. New hash: %s\n", module.Path, module.Version, hash)
 		}
 	}
 

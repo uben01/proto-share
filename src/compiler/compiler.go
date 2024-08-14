@@ -62,6 +62,8 @@ func CompileModules(config *Config) error {
 			return fmt.Errorf("failed to create command: %s", cmdStr)
 		}
 
+		fmt.Printf("Running command: %s\n", cmdStr)
+
 		output, err := executeCommand(cmd)
 		if err != nil {
 			fmt.Println(string(output))

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -37,6 +38,8 @@ func ParseConfig(configPath string) (*Config, error) {
 	}
 
 	config.Languages = mergedLanguages
+
+	fmt.Printf("Parsed config at: %s\n", configPath)
 
 	return &config, err
 }

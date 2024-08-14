@@ -1,6 +1,7 @@
 package module
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -23,9 +24,13 @@ func GetAllModules(root string) ([]*Module, error) {
 	var modules []*Module
 	for _, file := range files {
 		module, err := readAndParseModuleYml(file)
+
 		if err != nil {
 			return nil, err
 		}
+
+		fmt.Printf("Module parsed: %v\n", module.Name)
+
 		modules = append(modules, module)
 	}
 
