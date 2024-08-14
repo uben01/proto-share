@@ -1,5 +1,7 @@
 projectName: "myProject"
-inDir: "sample-project/proto"
-outDir: "sample-project/out"
+inDir: "proto"
+outDir: "out"
 languages:
-  java:
+  Java:
+  PHP:
+  TypeScript:
