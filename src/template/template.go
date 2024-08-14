@@ -2,6 +2,7 @@ package template
 
 import (
 	"embed"
+	"errors"
 	"fmt"
 	"io/fs"
 	. "os"
@@ -64,6 +65,10 @@ func GenerateTemplates(embedFileSystem embed.FS, renderConfig *RenderConfig) err
 
 func renderTemplates(embedFileSystem embed.FS, from string, to string, renderConfig *RenderConfig) error {
 	return fs.WalkDir(embedFileSystem, from, func(path string, d DirEntry, err error) error {
+		if errors.Is(err, fs.ErrNotExist) {
+			return nil
+		}
+
 		if d.IsDir() {
 			if path == from {
 				return nil
