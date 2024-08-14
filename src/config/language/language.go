@@ -8,7 +8,9 @@ import (
 type LanguageName string
 
 const (
-	Java LanguageName = "java"
+	Java       LanguageName = "Java"
+	PHP        LanguageName = "PHP"
+	TypeScript LanguageName = "TypeScript"
 )
 
 type Language struct {
@@ -20,7 +22,9 @@ type Language struct {
 }
 
 var defaultMapping = map[LanguageName]*Language{
-	Java: defaultJava(),
+	Java:       defaultJava(),
+	PHP:        defaultPHP(),
+	TypeScript: defaultTS(),
 }
 
 func MergeWithDefault(languageName LanguageName, actualLanguage *Language) (*Language, error) {
