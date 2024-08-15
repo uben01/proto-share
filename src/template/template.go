@@ -49,7 +49,11 @@ func GenerateTemplates(embedFileSystem embed.FS, renderConfig *RenderConfig) err
 
 			fmt.Printf("  Generating templates for module: %s\n", module.Name)
 
-			moduleOutputPath := filepath.Join(renderConfig.Config.OutDir, language.SubDir, language.ModulePath, module.Name)
+			moduleOutputPath := filepath.Join(renderConfig.Config.OutDir, language.SubDir, language.ModulePath)
+			if language.SeparateModuleDir {
+				moduleOutputPath = filepath.Join(moduleOutputPath, module.Name)
+			}
+
 			if err := renderTemplates(
 				embedFileSystem,
 				templateLanguageModuleRoot,

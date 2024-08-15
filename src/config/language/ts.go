@@ -2,9 +2,10 @@ package language
 
 func defaultTS() *Language {
 	return &Language{
-		SubDir:         "ts",
-		ModulePath:     ".",
-		ProtoOutputDir: ".",
-		ProtocCommand:  "ts_out",
+		SubDir:            "ts",
+		ModulePath:        ".",
+		SeparateModuleDir: false,
+		ProtoOutputDir:    ".",
+		ProtocCommand:     "ts_out",
 	}
 }

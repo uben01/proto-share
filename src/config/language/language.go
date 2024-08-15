@@ -16,6 +16,7 @@ const (
 type Language struct {
 	SubDir               string            `yaml:"subDirName"`
 	ModulePath           string            `yaml:"modulePath"`
+	SeparateModuleDir    bool              `yaml:"separateModuleDir"`
 	ProtoOutputDir       string            `yaml:"protoOutputDir"`
 	ProtocCommand        string            `yaml:"protocCommand"`
 	AdditionalParameters map[string]string `yaml:"additionalParameters"`
@@ -63,6 +64,8 @@ func isEmptyValue(v reflect.Value) bool {
 		return v.Len() == 0
 	case reflect.Ptr, reflect.Interface:
 		return v.IsNil()
+	case reflect.Bool:
+		return !v.Bool()
 	default:
 		panic("unhandled default case")
 	}
