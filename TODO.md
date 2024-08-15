@@ -7,6 +7,8 @@
     - *option 2: Read `include` in proto schema*
 - [ ] Generate compatibility tests upon schema changes
 - [ ] Support new languages
+- [ ] Support new features for languages
+    - *e.g. for PHP modules don't need to be a different directory* 
 - [ ] Make templates extendable
     - *use case: maven repository config in build.gradle*
 - [ ] Make `module.yml` optional -> Modules defined in config
