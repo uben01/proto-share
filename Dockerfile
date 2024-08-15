@@ -1,12 +1,7 @@
-FROM alpine:3.20
+FROM alpine:latest AS builder
 
 RUN apk add --no-cache \
-    protoc \
-    go  \
-    nodejs \
-    npm
-
-RUN npm install -g protoc-gen-ts
+    go
 
 COPY ./src /compiler/src
 COPY ./templates /compiler/templates
@@ -15,4 +10,15 @@ COPY ./go.work /compiler/go.work
 WORKDIR /compiler
 
 RUN go generate ./src/main.go
-RUN go build -o /bin/proto-share ./src/main.go
+RUN go build -o ./proto-share ./src/main.go
+
+FROM alpine:latest AS release
+
+COPY --from=builder /compiler/proto-share /bin/proto-share
+
+RUN apk add --no-cache \
+    protoc \
+    nodejs \
+    npm
+
+RUN npm install -g protoc-gen-ts
