@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	. "os/exec"
+	"os/exec"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -64,128 +64,103 @@ func TestCompileModules_withoutLanguages_returnsError(t *testing.T) {
 	assert.Equal(t, "no languages defined", err.Error())
 }
 
-func TestCompileModules_createLayoutReturnsError_errorForwarded(t *testing.T) {
-	defer stubMkDirAll(func(path string, perm os.FileMode) error {
-		expectedPath := fmt.Sprintf(
-			"%s/%s/%s/%s/%s",
-			testConfig.OutDir,
-			testLanguage.SubDir,
-			testLanguage.ModulePath,
-			testModule.Name,
-			testLanguage.ProtoOutputDir,
-		)
-		assert.Equal(t, expectedPath, path)
-		assert.Equal(t, os.ModePerm, perm)
-
-		return errors.New("stubbed error")
-	})()
-
-	err := CompileModules(&testConfig)
-
-	assert.NotNil(t, err)
-	assert.Equal(t, "stubbed error", err.Error())
-}
-
-func TestCompileModules_createCommandReturnsNil_errorReturned(t *testing.T) {
-	defer stubMkDirAll(func(string, os.FileMode) error {
-		return nil
-	})()
+func TestCompileProtos_executeReturnsNil_ErrorReturned(t *testing.T) {
+	firstLangOut := "myOut"
+	secondLangOut := "myOtherOut"
 
 	expectedProtocCommand := fmt.Sprintf(
-		"protoc --%s=%s/%s/%s/%s/%s -I %s %s/%s/*.proto",
-		testLanguage.ProtocCommand,
-		testConfig.OutDir,
-		testLanguage.SubDir,
-		testLanguage.ModulePath,
-		testModule.Name,
-		testLanguage.ProtoOutputDir,
+		"protoc %s %s -I %s %s/%s/*.proto",
+		firstLangOut,
+		secondLangOut,
 		testConfig.InDir,
 		testConfig.InDir,
 		testModule.Path,
 	)
 
-	defer stubCreateCommand(func(name string, arg ...string) *Cmd {
+	stubExecute := func(name string, arg ...string) *exec.Cmd {
 		assert.Equal(t, "sh", name)
-		assert.Len(t, arg, 2)
-		assert.Equal(t, "-c", arg[0])
-
-		assert.Equal(t, expectedProtocCommand, arg[1])
+		assert.Equal(t, []string{"-c", expectedProtocCommand}, arg)
 
 		return nil
-	})()
+	}
 
-	err := CompileModules(&testConfig)
+	err := compileProtos(&testConfig, &testModule, []string{firstLangOut, secondLangOut}, stubExecute, func(cmd *exec.Cmd) ([]byte, error) { return nil, nil })
 
-	assert.NotNil(t, err)
-	assert.Equal(t, fmt.Sprintf("failed to create command: %s", expectedProtocCommand), err.Error())
+	assert.Error(t, err)
+	assert.Equal(t, "failed to create command: "+expectedProtocCommand, err.Error())
 }
 
-func TestCompileModules_executeCommandReturnsError_errorReturned(t *testing.T) {
-	defer stubMkDirAll(func(string, os.FileMode) error {
-		return nil
-	})()
+func TestCompileProtos_CombinedOutputReturnsError_ErrorForwarded(t *testing.T) {
+	expectedErrorMsg := "stubbed error"
 
-	stubCmd := &Cmd{}
-	defer stubCreateCommand(func(string, ...string) *Cmd {
-		return stubCmd
-	})()
+	cmdMock := &exec.Cmd{}
+	stubExecute := func(string, ...string) *exec.Cmd {
+		return cmdMock
+	}
 
-	defer stubExecuteCommand(func(cmd *Cmd) ([]byte, error) {
-		assert.Equal(t, stubCmd, cmd)
+	stubCombinedOutput := func(cmd *exec.Cmd) ([]byte, error) {
+		assert.Equal(t, cmdMock, cmd)
+		return nil, errors.New(expectedErrorMsg)
+	}
 
-		return nil, errors.New("stubbed error")
-	})()
+	err := compileProtos(&testConfig, &testModule, []string{"myLangOut"}, stubExecute, stubCombinedOutput)
 
-	err := CompileModules(&testConfig)
-
-	assert.NotNil(t, err)
-	assert.Equal(t, "stubbed error", err.Error())
+	assert.Error(t, err)
+	assert.Equal(t, expectedErrorMsg, err.Error())
 }
 
-func TestCompileModules_noError_returnsNil(t *testing.T) {
-	defer stubMkDirAll(func(string, os.FileMode) error {
-		return nil
-	})()
+func TestCompileProtos_CombinedOutputReturnsNoError_NilReturned(t *testing.T) {
+	cmdMock := &exec.Cmd{}
+	stubExecute := func(string, ...string) *exec.Cmd {
+		return cmdMock
+	}
 
-	defer stubCreateCommand(func(string, ...string) *Cmd {
-		return &Cmd{}
-	})()
-
-	defer stubExecuteCommand(func(*Cmd) ([]byte, error) {
+	stubCombinedOutput := func(cmd *exec.Cmd) ([]byte, error) {
 		return nil, nil
-	})()
+	}
 
-	err := CompileModules(&testConfig)
+	err := compileProtos(&testConfig, &testModule, []string{"myLangOut"}, stubExecute, stubCombinedOutput)
 
 	assert.Nil(t, err)
 }
 
-func stubMkDirAll(stub func(string, os.FileMode) error) func() {
-	originalMkDirAll := mkdirAll
+func TestPrepareLanguageOutput_MkdirAllReturnsError_ErrorForwarded(t *testing.T) {
+	expectedErrorMsg := "stubbed error"
 
-	mkdirAll = stub
-
-	return func() {
-		mkdirAll = originalMkDirAll
+	stubMkdirAll := func(string, os.FileMode) error {
+		return errors.New(expectedErrorMsg)
 	}
+
+	_, err := prepareLanguageOutput(&testConfig, &testLanguage, &testModule, stubMkdirAll)
+
+	assert.Error(t, err)
+	assert.Equal(t, expectedErrorMsg, err.Error())
 }
 
-func stubCreateCommand(stub func(string, ...string) *Cmd) func() {
-	originalCreateCommand := createCommand
+func TestPrepareLanguageOutput_LanguageSeparateDirsOptionOn_OutputPathContainsModuleName(t *testing.T) {
+	testLanguage.SeparateModuleDir = true
+	expectedOutputPath := "outdir/myLang/myModuleGoesHere/my_module/src/main"
 
-	createCommand = stub
-
-	return func() {
-		createCommand = originalCreateCommand
+	stubMkdirAll := func(string, os.FileMode) error {
+		return nil
 	}
+
+	outputPath, err := prepareLanguageOutput(&testConfig, &testLanguage, &testModule, stubMkdirAll)
+
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutputPath, outputPath)
 }
 
-func stubExecuteCommand(stub func(*Cmd) ([]byte, error)) func() {
-	originalExecuteCommand := executeCommand
+func TestPrepareLanguageOutput_LanguageSeparateDirsOptionOff_OutputPathDoesNotContainModuleName(t *testing.T) {
+	testLanguage.SeparateModuleDir = false
+	expectedOutputPath := "outdir/myLang/myModuleGoesHere/src/main"
 
-	executeCommand = stub
-
-	return func() {
-		executeCommand = originalExecuteCommand
+	stubMkdirAll := func(string, os.FileMode) error {
+		return nil
 	}
+
+	outputPath, err := prepareLanguageOutput(&testConfig, &testLanguage, &testModule, stubMkdirAll)
+
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutputPath, outputPath)
 }
