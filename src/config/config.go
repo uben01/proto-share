@@ -26,20 +26,29 @@ func ParseConfig(configPath string) (*Config, error) {
 	}
 
 	var config Config
-	err = yaml.Unmarshal(data, &config)
+	if err = yaml.Unmarshal(data, &config); err != nil {
+		return nil, err
+	}
 
+	if err = mergeConfigWithDefaults(&config); err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("Parsed config at: %s\n", configPath)
+
+	return &config, nil
+}
+
+func mergeConfigWithDefaults(config *Config) error {
 	var mergedLanguages = make(map[LanguageName]*Language, len(config.Languages))
 	for languageName, languageConfig := range config.Languages {
 		lang, err := MergeWithDefault(languageName, languageConfig)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		mergedLanguages[languageName] = lang
 	}
-
 	config.Languages = mergedLanguages
 
-	fmt.Printf("Parsed config at: %s\n", configPath)
-
-	return &config, err
+	return nil
 }
