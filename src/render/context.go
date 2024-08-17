@@ -1,4 +1,4 @@
-package template
+package render
 
 import (
 	. "config"
@@ -6,7 +6,7 @@ import (
 	. "config/module"
 )
 
-type RenderConfig struct {
+type Context struct {
 	Config   *Config
 	Module   *Module
 	Language *Language

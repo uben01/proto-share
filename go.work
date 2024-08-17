@@ -6,5 +6,5 @@ use (
 	src/config
 	src/config/language
 	src/config/module
-	src/template
+	src/render
 )

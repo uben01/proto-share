@@ -7,7 +7,7 @@ import (
 	. "compiler"
 	. "config"
 	. "config/module"
-	. "template"
+	. "render"
 )
 
 //go:generate mkdir -p build
@@ -37,8 +37,8 @@ func main() {
 		panic(err)
 	}
 
-	renderConfig := &RenderConfig{Config: config}
-	if err = GenerateTemplates(embedFileSystem, renderConfig); err != nil {
+	context := &Context{Config: config}
+	if err = GenerateTemplates(embedFileSystem, context); err != nil {
 		panic(err)
 	}
 

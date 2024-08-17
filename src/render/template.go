@@ -1,4 +1,4 @@
-package template
+package render
 
 import (
 	"embed"
@@ -12,13 +12,13 @@ import (
 
 var templateRoot = filepath.Join("build", "templates")
 
-func GenerateTemplates(embedFileSystem embed.FS, renderConfig *RenderConfig) error {
-	for languageName, language := range renderConfig.Config.Languages {
-		renderConfig.Language = language
+func GenerateTemplates(embedFileSystem embed.FS, context *Context) error {
+	for languageName, language := range context.Config.Languages {
+		context.Language = language
 
-		languageOutputPath := filepath.Join(renderConfig.Config.OutDir, language.SubDir)
+		languageOutputPath := filepath.Join(context.Config.OutDir, language.SubDir)
 
-		for _, module := range renderConfig.Config.Modules {
+		for _, module := range context.Config.Modules {
 			if err := MkdirAll(
 				filepath.Join(languageOutputPath, language.GetModulePath(module)),
 				ModePerm,
@@ -34,14 +34,14 @@ func GenerateTemplates(embedFileSystem embed.FS, renderConfig *RenderConfig) err
 			embedFileSystem,
 			templateLanguageRoot,
 			languageOutputPath,
-			renderConfig,
+			context,
 		); err != nil {
 			return err
 		}
 
 		templateLanguageModuleRoot := filepath.Join(templateRoot, languageName.String(), "module")
-		for _, module := range renderConfig.Config.Modules {
-			renderConfig.Module = module
+		for _, module := range context.Config.Modules {
+			context.Module = module
 
 			fmt.Printf("\tGenerating templates for module: %s\n", module.Name)
 
@@ -51,7 +51,7 @@ func GenerateTemplates(embedFileSystem embed.FS, renderConfig *RenderConfig) err
 				embedFileSystem,
 				templateLanguageModuleRoot,
 				moduleOutputPath,
-				renderConfig,
+				context,
 			); err != nil {
 				return err
 			}
@@ -60,7 +60,7 @@ func GenerateTemplates(embedFileSystem embed.FS, renderConfig *RenderConfig) err
 	return nil
 }
 
-func renderTemplates(embedFileSystem embed.FS, from string, to string, renderConfig *RenderConfig) error {
+func renderTemplates(embedFileSystem embed.FS, from string, to string, context *Context) error {
 	return fs.WalkDir(embedFileSystem, from, func(path string, d DirEntry, err error) error {
 		if errors.Is(err, fs.ErrNotExist) {
 			return nil
@@ -75,7 +75,7 @@ func renderTemplates(embedFileSystem embed.FS, from string, to string, renderCon
 			if err != nil {
 				return err
 			}
-			err = renderTemplates(embedFileSystem, path, filepath.Join(to, d.Name()), renderConfig)
+			err = renderTemplates(embedFileSystem, path, filepath.Join(to, d.Name()), context)
 			if err != nil {
 				return err
 			}
@@ -95,7 +95,7 @@ func renderTemplates(embedFileSystem embed.FS, from string, to string, renderCon
 			return err
 		}
 
-		err = t.Execute(file, renderConfig)
+		err = t.Execute(file, context)
 		if err != nil {
 			return err
 		}
