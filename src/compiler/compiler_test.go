@@ -32,7 +32,7 @@ var (
 		Modules: []*Module{
 			&testModule,
 		},
-		Languages: map[LanguageName]*Language{
+		Languages: map[Name]*Language{
 			"myLang": &testLanguage,
 		},
 	}
@@ -54,7 +54,7 @@ func TestCompileModules_withoutLanguages_returnsError(t *testing.T) {
 		Modules: []*Module{
 			{},
 		},
-		Languages: map[LanguageName]*Language{},
+		Languages: map[Name]*Language{},
 	}
 
 	err := CompileModules(config)

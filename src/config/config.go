@@ -11,10 +11,10 @@ import (
 )
 
 type Config struct {
-	ProjectName string                     `yaml:"projectName"`
-	InDir       string                     `yaml:"inDir"`
-	OutDir      string                     `yaml:"outDir"`
-	Languages   map[LanguageName]*Language `yaml:"languages"`
+	ProjectName string             `yaml:"projectName"`
+	InDir       string             `yaml:"inDir"`
+	OutDir      string             `yaml:"outDir"`
+	Languages   map[Name]*Language `yaml:"languages"`
 
 	Modules []*Module
 }
@@ -40,7 +40,7 @@ func ParseConfig(configPath string) (*Config, error) {
 }
 
 func mergeConfigWithDefaults(config *Config) error {
-	var mergedLanguages = make(map[LanguageName]*Language, len(config.Languages))
+	var mergedLanguages = make(map[Name]*Language, len(config.Languages))
 	for languageName, languageConfig := range config.Languages {
 		lang, err := MergeWithDefault(languageName, languageConfig)
 		if err != nil {

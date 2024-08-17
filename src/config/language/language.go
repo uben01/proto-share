@@ -8,15 +8,15 @@ import (
 	"config/module"
 )
 
-type LanguageName string
+type Name string
 
 const (
-	Java       LanguageName = "Java"
-	PHP        LanguageName = "PHP"
-	TypeScript LanguageName = "TypeScript"
+	Java       Name = "Java"
+	PHP        Name = "PHP"
+	TypeScript Name = "TypeScript"
 )
 
-func (name LanguageName) String() string {
+func (name Name) String() string {
 	return strings.ToLower(string(name))
 }
 
@@ -31,13 +31,13 @@ func (language Language) GetModulePath(module *module.Module) string {
 	return strings.ReplaceAll(language.ModulePathTemplate, "{module}", module.Name)
 }
 
-var defaultMapping = map[LanguageName]*Language{
+var defaultMapping = map[Name]*Language{
 	Java:       defaultJava(),
 	PHP:        defaultPHP(),
 	TypeScript: defaultTS(),
 }
 
-func MergeWithDefault(languageName LanguageName, actualLanguage *Language) (*Language, error) {
+func MergeWithDefault(languageName Name, actualLanguage *Language) (*Language, error) {
 	defaultLanguageConfig := defaultMapping[languageName]
 
 	if defaultLanguageConfig == nil {
