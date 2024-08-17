@@ -8,17 +8,21 @@ import (
 	. "os"
 	"path/filepath"
 	"text/template"
+
+	. "config"
 )
 
 var templateRoot = filepath.Join("build", "templates")
 
-func GenerateTemplates(embedFileSystem embed.FS, context *Context) error {
-	for languageName, language := range context.Config.Languages {
+func GenerateTemplates(embedFileSystem embed.FS, config *Config) error {
+	context := &Context{Config: config}
+
+	for languageName, language := range config.Languages {
 		context.Language = language
 
-		languageOutputPath := filepath.Join(context.Config.OutDir, language.SubDir)
+		languageOutputPath := filepath.Join(config.OutDir, language.SubDir)
 
-		for _, module := range context.Config.Modules {
+		for _, module := range config.Modules {
 			if err := MkdirAll(
 				filepath.Join(languageOutputPath, language.GetModulePath(module)),
 				ModePerm,
@@ -40,7 +44,7 @@ func GenerateTemplates(embedFileSystem embed.FS, context *Context) error {
 		}
 
 		templateLanguageModuleRoot := filepath.Join(templateRoot, languageName.String(), "module")
-		for _, module := range context.Config.Modules {
+		for _, module := range config.Modules {
 			context.Module = module
 
 			fmt.Printf("\tGenerating templates for module: %s\n", module.Name)

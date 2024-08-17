@@ -35,8 +35,7 @@ func main() {
 		panic(err)
 	}
 
-	context := &Context{Config: config}
-	if err = GenerateTemplates(embedFileSystem, context); err != nil {
+	if err = GenerateTemplates(embedFileSystem, config); err != nil {
 		panic(err)
 	}
 
