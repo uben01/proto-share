@@ -21,10 +21,9 @@ var (
 	}
 
 	testLanguage = Language{
-		SubDir:         "myLang",
-		ModulePath:     "myModuleGoesHere",
-		ProtoOutputDir: "src/main",
-		ProtocCommand:  "myLangOut",
+		SubDir:             "myLang",
+		ModulePathTemplate: "{module}/src/main",
+		ProtocCommand:      "myLangOut",
 	}
 
 	testConfig = Config{
@@ -137,23 +136,8 @@ func TestPrepareLanguageOutput_MkdirAllReturnsError_ErrorForwarded(t *testing.T)
 	assert.Equal(t, expectedErrorMsg, err.Error())
 }
 
-func TestPrepareLanguageOutput_LanguageSeparateDirsOptionOn_OutputPathContainsModuleName(t *testing.T) {
-	testLanguage.SeparateModuleDir = true
-	expectedOutputPath := "outdir/myLang/myModuleGoesHere/my_module/src/main"
-
-	stubMkdirAll := func(string, os.FileMode) error {
-		return nil
-	}
-
-	outputPath, err := prepareLanguageOutput(&testConfig, &testLanguage, &testModule, stubMkdirAll)
-
-	assert.Nil(t, err)
-	assert.Equal(t, expectedOutputPath, outputPath)
-}
-
-func TestPrepareLanguageOutput_LanguageSeparateDirsOptionOff_OutputPathDoesNotContainModuleName(t *testing.T) {
-	testLanguage.SeparateModuleDir = false
-	expectedOutputPath := "outdir/myLang/myModuleGoesHere/src/main"
+func TestPrepareLanguageOutput_LanguagePathTemplateContainsModule_ModuleNameReplaced(t *testing.T) {
+	expectedOutputPath := "outdir/myLang/my_module/src/main"
 
 	stubMkdirAll := func(string, os.FileMode) error {
 		return nil

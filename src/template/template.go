@@ -7,7 +7,6 @@ import (
 	"io/fs"
 	. "os"
 	"path/filepath"
-	"strings"
 	"text/template"
 )
 
@@ -18,13 +17,10 @@ func GenerateTemplates(embedFileSystem embed.FS, renderConfig *RenderConfig) err
 		renderConfig.Language = language
 
 		languageOutputPath := filepath.Join(renderConfig.Config.OutDir, language.SubDir)
-		if err := MkdirAll(languageOutputPath, ModePerm); err != nil {
-			return err
-		}
 
 		for _, module := range renderConfig.Config.Modules {
 			if err := MkdirAll(
-				filepath.Join(languageOutputPath, language.ModulePath, module.Name),
+				filepath.Join(languageOutputPath, language.GetModulePath(module)),
 				ModePerm,
 			); err != nil {
 				return err
@@ -33,7 +29,7 @@ func GenerateTemplates(embedFileSystem embed.FS, renderConfig *RenderConfig) err
 
 		fmt.Printf("Generating templates for language: %s\n", languageName)
 
-		templateLanguageRoot := filepath.Join(templateRoot, strings.ToLower(string(languageName)), "global")
+		templateLanguageRoot := filepath.Join(templateRoot, languageName.String(), "global")
 		if err := renderTemplates(
 			embedFileSystem,
 			templateLanguageRoot,
@@ -43,16 +39,13 @@ func GenerateTemplates(embedFileSystem embed.FS, renderConfig *RenderConfig) err
 			return err
 		}
 
-		templateLanguageModuleRoot := filepath.Join(templateRoot, strings.ToLower(string(languageName)), "module")
+		templateLanguageModuleRoot := filepath.Join(templateRoot, languageName.String(), "module")
 		for _, module := range renderConfig.Config.Modules {
 			renderConfig.Module = module
 
-			fmt.Printf("  Generating templates for module: %s\n", module.Name)
+			fmt.Printf("\tGenerating templates for module: %s\n", module.Name)
 
-			moduleOutputPath := filepath.Join(renderConfig.Config.OutDir, language.SubDir, language.ModulePath)
-			if language.SeparateModuleDir {
-				moduleOutputPath = filepath.Join(moduleOutputPath, module.Name)
-			}
+			moduleOutputPath := filepath.Join(languageOutputPath, language.GetModulePath(module))
 
 			if err := renderTemplates(
 				embedFileSystem,

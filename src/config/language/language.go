@@ -3,6 +3,9 @@ package language
 import (
 	"fmt"
 	"reflect"
+	"strings"
+
+	"config/module"
 )
 
 type LanguageName string
@@ -13,13 +16,19 @@ const (
 	TypeScript LanguageName = "TypeScript"
 )
 
+func (name LanguageName) String() string {
+	return strings.ToLower(string(name))
+}
+
 type Language struct {
+	ModulePathTemplate   string            `yaml:"modulePathTemplate"`
 	SubDir               string            `yaml:"subDirName"`
-	ModulePath           string            `yaml:"modulePath"`
-	SeparateModuleDir    bool              `yaml:"separateModuleDir"`
-	ProtoOutputDir       string            `yaml:"protoOutputDir"`
 	ProtocCommand        string            `yaml:"protocCommand"`
 	AdditionalParameters map[string]string `yaml:"additionalParameters"`
+}
+
+func (language Language) GetModulePath(module *module.Module) string {
+	return strings.ReplaceAll(language.ModulePathTemplate, "{module}", module.Name)
 }
 
 var defaultMapping = map[LanguageName]*Language{
