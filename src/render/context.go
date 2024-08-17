@@ -6,7 +6,7 @@ import (
 	. "config/module"
 )
 
-type Context struct {
+type context struct {
 	Config   *Config
 	Module   *Module
 	Language *Language
