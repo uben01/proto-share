@@ -10,9 +10,7 @@ import (
 	. "render"
 )
 
-//go:generate mkdir -p build
-//go:generate cp -RL ../templates build
-//go:embed build/templates
+//go:embed templates
 var embedFileSystem embed.FS
 
 func main() {
