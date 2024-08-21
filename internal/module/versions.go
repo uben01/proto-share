@@ -4,11 +4,10 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"io"
 	"os"
 	"path/filepath"
-
-	"gopkg.in/yaml.v3"
 )
 
 func UpdateModulesVersion(modules []*Module, inDir string) error {

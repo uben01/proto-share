@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	. "os"
+	"os"
 	"path/filepath"
 	"text/template"
 
-	. "config"
+	. "github.com/uben01/proto-share/internal/config"
 )
 
 var templateRoot = filepath.Join("build", "templates")
@@ -22,9 +22,9 @@ func GenerateTemplates(fileSystem fs.FS, config *Config) error {
 		languageOutputPath := filepath.Join(config.OutDir, language.SubDir)
 
 		for _, module := range config.Modules {
-			if err := MkdirAll(
+			if err := os.MkdirAll(
 				filepath.Join(languageOutputPath, language.GetModulePath(module)),
-				ModePerm,
+				os.ModePerm,
 			); err != nil {
 				return err
 			}
@@ -64,7 +64,7 @@ func GenerateTemplates(fileSystem fs.FS, config *Config) error {
 }
 
 func renderTemplates(fileSystem fs.FS, from string, to string, context *context) error {
-	return fs.WalkDir(fileSystem, from, func(path string, d DirEntry, err error) error {
+	return fs.WalkDir(fileSystem, from, func(path string, d os.DirEntry, err error) error {
 		if errors.Is(err, fs.ErrNotExist) {
 			return nil
 		}
@@ -78,7 +78,7 @@ func renderTemplates(fileSystem fs.FS, from string, to string, context *context)
 				return nil
 			}
 
-			err = MkdirAll(filepath.Join(to, d.Name()), ModePerm)
+			err = os.MkdirAll(filepath.Join(to, d.Name()), os.ModePerm)
 			if err != nil {
 				return err
 			}
@@ -97,7 +97,7 @@ func renderTemplates(fileSystem fs.FS, from string, to string, context *context)
 			return err
 		}
 
-		file, err := Create(outputPath)
+		file, err := os.Create(outputPath)
 		if err != nil {
 			return err
 		}

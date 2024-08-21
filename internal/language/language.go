@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"config/module"
+	"github.com/uben01/proto-share/internal/module"
 )
 
 type Name string

@@ -9,9 +9,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	. "config"
-	. "config/language"
-	. "config/module"
+	. "github.com/uben01/proto-share/internal/config"
+	. "github.com/uben01/proto-share/internal/language"
+	. "github.com/uben01/proto-share/internal/module"
 )
 
 var (

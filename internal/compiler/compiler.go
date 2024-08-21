@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	. "config"
-	. "config/language"
-	. "config/module"
+	. "github.com/uben01/proto-share/internal/config"
+	. "github.com/uben01/proto-share/internal/language"
+	. "github.com/uben01/proto-share/internal/module"
 )
 
 func CompileModules(config *Config) error {

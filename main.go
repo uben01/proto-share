@@ -4,13 +4,13 @@ import (
 	"embed"
 	"flag"
 
-	. "compiler"
-	. "config"
-	. "config/module"
-	. "render"
+	. "github.com/uben01/proto-share/internal/compiler"
+	. "github.com/uben01/proto-share/internal/config"
+	. "github.com/uben01/proto-share/internal/module"
+	. "github.com/uben01/proto-share/internal/render"
 )
 
-//go:embed templates
+//go:embed assets/templates
 var embedFileSystem embed.FS
 
 func main() {

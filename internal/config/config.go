@@ -6,8 +6,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	. "config/language"
-	. "config/module"
+	. "github.com/uben01/proto-share/internal/language"
+	. "github.com/uben01/proto-share/internal/module"
 )
 
 type Config struct {

@@ -3,12 +3,11 @@ FROM alpine:latest AS builder
 RUN apk add --no-cache \
     go
 
-COPY ./src /compiler/src
-COPY ./go.work /compiler/go.work
+COPY . /compiler/src
 
-WORKDIR /compiler
+WORKDIR /compiler/src
 
-RUN go build -o ./proto-share ./src/main.go
+RUN go build -o ../proto-share .
 
 FROM alpine:latest AS release
 
