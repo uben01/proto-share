@@ -7,7 +7,7 @@ import (
 	. "github.com/uben01/proto-share/internal/compiler"
 	. "github.com/uben01/proto-share/internal/config"
 	. "github.com/uben01/proto-share/internal/module"
-	. "github.com/uben01/proto-share/internal/render"
+	. "github.com/uben01/proto-share/internal/renderer"
 )
 
 //go:embed assets/templates
@@ -25,17 +25,17 @@ func main() {
 		panic(err)
 	}
 
-	modules, err := GetAllModules(config.InDir)
+	modules, err := DiscoverModules(config.InDir)
 	if err != nil {
 		panic(err)
 	}
 	config.Modules = modules
 
-	if err = UpdateModulesVersion(config.Modules, config.InDir); err != nil {
+	if err = UpdateModuleVersions(config.Modules, config.InDir); err != nil {
 		panic(err)
 	}
 
-	if err = GenerateTemplates(embedFileSystem, config); err != nil {
+	if err = RenderTemplates(embedFileSystem, config); err != nil {
 		panic(err)
 	}
 

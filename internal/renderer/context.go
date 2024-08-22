@@ -1,4 +1,4 @@
-package render
+package renderer
 
 import (
 	. "github.com/uben01/proto-share/internal/config"

@@ -21,14 +21,19 @@ func (name Name) String() string {
 }
 
 type Language struct {
-	ModulePathTemplate   string            `yaml:"modulePathTemplate"`
+	ModuleCompilePath    string            `yaml:"moduleCompilePath"`
+	ModuleTemplatePath   string            `yaml:"moduleTemplatePath"`
 	SubDir               string            `yaml:"subDirName"`
 	ProtocCommand        string            `yaml:"protocCommand"`
 	AdditionalParameters map[string]string `yaml:"additionalParameters"`
 }
 
-func (language Language) GetModulePath(module *module.Module) string {
-	return strings.ReplaceAll(language.ModulePathTemplate, "{module}", module.Name)
+func (language Language) GetModuleCompilePath(module *module.Module) string {
+	return strings.ReplaceAll(language.ModuleCompilePath, "{module}", module.Name)
+}
+
+func (language Language) GetTemplateCompilePath(module *module.Module) string {
+	return strings.ReplaceAll(language.ModuleTemplatePath, "{module}", module.Name)
 }
 
 var defaultMapping = map[Name]*Language{

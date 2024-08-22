@@ -65,7 +65,7 @@ func prepareLanguageOutput(
 	pathComponents := []string{
 		config.OutDir,
 		language.SubDir,
-		language.GetModulePath(module),
+		language.GetModuleCompilePath(module),
 	}
 
 	languageProtoOutDir := filepath.Join(pathComponents...)

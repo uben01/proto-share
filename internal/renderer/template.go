@@ -1,4 +1,4 @@
-package render
+package renderer
 
 import (
 	"errors"
@@ -11,9 +11,9 @@ import (
 	. "github.com/uben01/proto-share/internal/config"
 )
 
-var templateRoot = filepath.Join("build", "templates")
+var templateRoot = filepath.Join("assets", "templates")
 
-func GenerateTemplates(fileSystem fs.FS, config *Config) error {
+func RenderTemplates(fileSystem fs.FS, config *Config) error {
 	context := &context{Config: config}
 
 	for languageName, language := range config.Languages {
@@ -23,7 +23,7 @@ func GenerateTemplates(fileSystem fs.FS, config *Config) error {
 
 		for _, module := range config.Modules {
 			if err := os.MkdirAll(
-				filepath.Join(languageOutputPath, language.GetModulePath(module)),
+				filepath.Join(languageOutputPath, language.GetModuleCompilePath(module)),
 				os.ModePerm,
 			); err != nil {
 				return err
@@ -33,7 +33,7 @@ func GenerateTemplates(fileSystem fs.FS, config *Config) error {
 		fmt.Printf("Generating templates for language: %s\n", languageName)
 
 		templateLanguageRoot := filepath.Join(templateRoot, languageName.String(), "global")
-		if err := renderTemplates(
+		if err := createTemplateFiles(
 			fileSystem,
 			templateLanguageRoot,
 			languageOutputPath,
@@ -48,9 +48,9 @@ func GenerateTemplates(fileSystem fs.FS, config *Config) error {
 
 			fmt.Printf("\tGenerating templates for module: %s\n", module.Name)
 
-			moduleOutputPath := filepath.Join(languageOutputPath, language.GetModulePath(module))
+			moduleOutputPath := filepath.Join(languageOutputPath, language.GetTemplateCompilePath(module))
 
-			if err := renderTemplates(
+			if err := createTemplateFiles(
 				fileSystem,
 				templateLanguageModuleRoot,
 				moduleOutputPath,
@@ -63,7 +63,7 @@ func GenerateTemplates(fileSystem fs.FS, config *Config) error {
 	return nil
 }
 
-func renderTemplates(fileSystem fs.FS, from string, to string, context *context) error {
+func createTemplateFiles(fileSystem fs.FS, from string, to string, context *context) error {
 	return fs.WalkDir(fileSystem, from, func(path string, d os.DirEntry, err error) error {
 		if errors.Is(err, fs.ErrNotExist) {
 			return nil
@@ -82,7 +82,7 @@ func renderTemplates(fileSystem fs.FS, from string, to string, context *context)
 			if err != nil {
 				return err
 			}
-			err = renderTemplates(fileSystem, path, filepath.Join(to, d.Name()), context)
+			err = createTemplateFiles(fileSystem, path, filepath.Join(to, d.Name()), context)
 			if err != nil {
 				return err
 			}

@@ -4,13 +4,14 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"io"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/yaml.v3"
 )
 
-func UpdateModulesVersion(modules []*Module, inDir string) error {
+func UpdateModuleVersions(modules []*Module, inDir string) error {
 	for _, module := range modules {
 		moduleRoot := filepath.Join(inDir, module.Path)
 		hash, err := computeModuleMD5Hash(moduleRoot)

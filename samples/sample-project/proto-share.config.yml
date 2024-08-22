@@ -1,6 +1,6 @@
 projectName: "myProject"
-inDir: "proto"
-outDir: "out"
+inDir: "samples/sample-project/proto"
+outDir: "samples/sample-project/out"
 languages:
   Java:
   PHP:

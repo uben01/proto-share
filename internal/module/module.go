@@ -15,7 +15,7 @@ type Module struct {
 	Path    string `yaml:"path"`
 }
 
-func GetAllModules(root string) ([]*Module, error) {
+func DiscoverModules(root string) ([]*Module, error) {
 	files, err := findModuleYmlFiles(root)
 	if err != nil {
 		return nil, err

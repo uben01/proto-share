@@ -2,7 +2,8 @@ package language
 
 func defaultPHP() *Language {
 	return &Language{
-		ModulePathTemplate: "",
+		ModuleTemplatePath: "",
+		ModuleCompilePath:  "",
 		SubDir:             "php",
 		ProtocCommand:      "php_out",
 	}
