@@ -21,9 +21,9 @@ var (
 	}
 
 	testLanguage = Language{
-		SubDir:             "myLang",
-		ModulePathTemplate: "{module}/src/main",
-		ProtocCommand:      "myLangOut",
+		SubDir:            "myLang",
+		ModuleCompilePath: "{module}/src/main",
+		ProtocCommand:     "myLangOut",
 	}
 
 	testConfig = Config{
