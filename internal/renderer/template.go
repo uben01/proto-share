@@ -19,18 +19,9 @@ func RenderTemplates(fileSystem fs.FS, config *Config) error {
 	for languageName, language := range config.Languages {
 		context.Language = language
 
-		languageOutputPath := filepath.Join(config.OutDir, language.SubDir)
-
-		for _, module := range config.Modules {
-			if err := os.MkdirAll(
-				filepath.Join(languageOutputPath, language.GetModuleCompilePath(module)),
-				os.ModePerm,
-			); err != nil {
-				return err
-			}
-		}
-
 		fmt.Printf("Generating templates for language: %s\n", languageName)
+
+		languageOutputPath := filepath.Join(config.OutDir, language.SubDir)
 
 		templateLanguageRoot := filepath.Join(templateRoot, languageName.String(), "global")
 		if err := createTemplateFiles(
@@ -49,7 +40,6 @@ func RenderTemplates(fileSystem fs.FS, config *Config) error {
 			fmt.Printf("\tGenerating templates for module: %s\n", module.Name)
 
 			moduleOutputPath := filepath.Join(languageOutputPath, language.GetTemplateCompilePath(module))
-
 			if err := createTemplateFiles(
 				fileSystem,
 				templateLanguageModuleRoot,
@@ -78,10 +68,6 @@ func createTemplateFiles(fileSystem fs.FS, from string, to string, context *cont
 				return nil
 			}
 
-			err = os.MkdirAll(filepath.Join(to, d.Name()), os.ModePerm)
-			if err != nil {
-				return err
-			}
 			err = createTemplateFiles(fileSystem, path, filepath.Join(to, d.Name()), context)
 			if err != nil {
 				return err
@@ -90,14 +76,17 @@ func createTemplateFiles(fileSystem fs.FS, from string, to string, context *cont
 			return nil
 		}
 
-		outputPath := filepath.Join(to, d.Name())
+		err = os.MkdirAll(to, os.ModePerm)
+		if err != nil {
+			return err
+		}
 
 		t, err := template.ParseFS(fileSystem, path)
 		if err != nil {
 			return err
 		}
 
-		file, err := os.Create(outputPath)
+		file, err := os.Create(filepath.Join(to, d.Name()))
 		if err != nil {
 			return err
 		}
