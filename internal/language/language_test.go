@@ -10,7 +10,7 @@ const mockLanguageName Name = "myLanguage"
 
 func mockLanguageDefault() *Language {
 	return &Language{
-		ModulePathTemplate:   "myModulePathTemplate",
+		ModuleTemplatePath:   "myModulePathTemplate",
 		SubDir:               "mySubDir",
 		ProtocCommand:        "myProtocCommand",
 		AdditionalParameters: map[string]string{"myKey": "myValue"},
