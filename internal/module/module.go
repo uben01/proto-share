@@ -2,8 +2,8 @@ package module
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
-	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
@@ -14,6 +14,8 @@ type Module struct {
 	Version int    `yaml:"version"`
 	Path    string `yaml:"path"`
 }
+
+var fileSystem = os.DirFS(".")
 
 func DiscoverModules(root string) ([]*Module, error) {
 	files, err := findModuleYmlFiles(root)
@@ -40,11 +42,11 @@ func DiscoverModules(root string) ([]*Module, error) {
 
 func findModuleYmlFiles(root string) ([]string, error) {
 	var files []string
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+	err := fs.WalkDir(fileSystem, root, func(path string, file os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		if !info.IsDir() && info.Name() == "module.yml" {
+		if !file.IsDir() && file.Name() == "module.yml" {
 			files = append(files, path)
 		}
 		return nil
@@ -53,7 +55,7 @@ func findModuleYmlFiles(root string) ([]string, error) {
 }
 
 func readAndParseModuleYml(filePath string) (*Module, error) {
-	data, err := os.ReadFile(filePath)
+	data, err := fs.ReadFile(fileSystem, filePath)
 	if err != nil {
 		return nil, err
 	}
