@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 
@@ -32,7 +33,7 @@ var fileSystem = os.DirFS(".")
 var mergeWithDefault = MergeWithDefault
 
 func ParseConfig(configPath string) (*Config, error) {
-	data, err := fs.ReadFile(fileSystem, configPath)
+	data, err := fs.ReadFile(fileSystem, filepath.Clean(configPath))
 	if err != nil {
 		return nil, err
 	}
