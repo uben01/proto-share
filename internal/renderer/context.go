@@ -11,3 +11,7 @@ type context struct {
 	Module   *Module
 	Language *Language
 }
+
+var newContext = func(config *Config) *context {
+	return &context{Config: config}
+}

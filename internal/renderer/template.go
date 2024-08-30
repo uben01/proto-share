@@ -22,7 +22,15 @@ var templateRoot = filepath.Join("assets", "templates")
 var parseTemplate = templ.ParseFS
 
 func RenderTemplates(fileSystem fs.FS, config *Config) error {
-	context := &context{Config: config}
+	context := newContext(config)
+
+	if len(config.Languages) == 0 {
+		return fmt.Errorf("no languages found in config")
+	}
+
+	if len(config.Modules) == 0 {
+		return fmt.Errorf("no modules found in config")
+	}
 
 	for languageName, language := range config.Languages {
 		context.Language = language
@@ -61,7 +69,7 @@ func RenderTemplates(fileSystem fs.FS, config *Config) error {
 	return nil
 }
 
-func walkTemplateDir(
+var walkTemplateDir = func(
 	fileSystem fs.FS,
 	from string,
 	to string,

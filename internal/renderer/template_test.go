@@ -12,6 +12,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/uben01/proto-share/internal/config"
+	"github.com/uben01/proto-share/internal/language"
+	"github.com/uben01/proto-share/internal/module"
 )
 
 // Mock for the text/template interface
@@ -39,6 +43,17 @@ func (m *MockCreateFileFromTemplate) createFileFromTemplate(
 	createFile func(string) (*os.File, error),
 ) error {
 	args := m.Called(tmpl, outputPath, outputFileName, context, mkdirAll, createFile)
+
+	return args.Error(0)
+}
+
+// Mock for walkTemplateDir function
+type MockWalkTemplateDir struct {
+	mock.Mock
+}
+
+func (m *MockWalkTemplateDir) walkTemplateDir(fs fs.FS, from string, to string, context *context) error {
+	args := m.Called(fs, from, to, context)
 
 	return args.Error(0)
 }
@@ -160,6 +175,90 @@ func TestWalkTemplateDir(t *testing.T) {
 	mockCreateFileFromTemplate.AssertExpectations(t)
 }
 
+// Tests for RenderTemplates function
+
+func TestRenderTemplates_NoLanguages_ReturnsError(t *testing.T) {
+	conf := &config.Config{}
+
+	testFs := fstest.MapFS{}
+
+	err := RenderTemplates(testFs, conf)
+
+	assert.Error(t, err)
+	assert.Equal(t, "no languages found in config", err.Error())
+}
+
+func TestRenderTemplates_NoModules_ReturnsError(t *testing.T) {
+	conf := &config.Config{}
+	conf.Languages = map[language.Name]*language.Language{
+		"test": {},
+	}
+
+	testFs := fstest.MapFS{}
+
+	err := RenderTemplates(testFs, conf)
+
+	assert.Error(t, err)
+	assert.Equal(t, "no modules found in config", err.Error())
+}
+
+func TestRenderTemplates_multipleLanguagesAndModules_walkTemplateDirCalledForEveryCombination(t *testing.T) {
+	conf := &config.Config{}
+	conf.OutDir = "out"
+	conf.Languages = map[language.Name]*language.Language{
+		"languageName1": {SubDir: "languagename1", ModuleTemplatePath: "module"},
+		"languageName2": {SubDir: "languagename2", ModuleTemplatePath: "{module}"},
+	}
+	conf.Modules = []*module.Module{
+		{Name: "module1"},
+		{Name: "module2"},
+	}
+	ctx := &context{Config: conf}
+	defer setNewContextFunc(ctx)()
+
+	mockWalkTemplateDir := new(MockWalkTemplateDir)
+	setWalkTemplateDirFunc(mockWalkTemplateDir)
+
+	testFs := fstest.MapFS{}
+	// Language globals
+	mockWalkTemplateDir.
+		On("walkTemplateDir", testFs, "assets/templates/languagename1/global", "out/languagename1", ctx).
+		Once().
+		Return(nil)
+	mockWalkTemplateDir.
+		On("walkTemplateDir", testFs, "assets/templates/languagename2/global", "out/languagename2", ctx).
+		Once().
+		Return(nil)
+
+	// Module for languages
+	mockWalkTemplateDir.
+		On("walkTemplateDir", testFs, "assets/templates/languagename1/module", "out/languagename1/module", ctx).
+		Once().
+		Return(nil)
+
+	mockWalkTemplateDir.
+		On("walkTemplateDir", testFs, "assets/templates/languagename1/module", "out/languagename1/module", ctx).
+		Once().
+		Return(nil)
+
+	mockWalkTemplateDir.
+		On("walkTemplateDir", testFs, "assets/templates/languagename2/module", "out/languagename2/module1", ctx).
+		Once().
+		Return(nil)
+
+	mockWalkTemplateDir.
+		On("walkTemplateDir", testFs, "assets/templates/languagename2/module", "out/languagename2/module2", ctx).
+		Once().
+		Return(nil)
+
+	err := RenderTemplates(testFs, conf)
+
+	assert.Nil(t, err)
+
+	mockWalkTemplateDir.AssertNumberOfCalls(t, "walkTemplateDir", 6)
+	mockWalkTemplateDir.AssertExpectations(t)
+}
+
 // Helper methods
 
 func stubMkdirAll(t *testing.T, expectedPath string, expectedPerm os.FileMode) func(string, os.FileMode) error {
@@ -196,5 +295,25 @@ func setParseTemplateFunc(template *templ.Template, err error) func() {
 
 	return func() {
 		parseTemplate = originalParseTemplate
+	}
+}
+
+func setNewContextFunc(c *context) func() {
+	originalNewContext := newContext
+	newContext = func(*config.Config) *context {
+		return c
+	}
+
+	return func() {
+		newContext = originalNewContext
+	}
+}
+
+func setWalkTemplateDirFunc(m *MockWalkTemplateDir) func() {
+	originalWalkTemplateDir := walkTemplateDir
+	walkTemplateDir = m.walkTemplateDir
+
+	return func() {
+		walkTemplateDir = originalWalkTemplateDir
 	}
 }
