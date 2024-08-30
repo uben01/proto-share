@@ -15,6 +15,8 @@ type Module struct {
 	Path    string `yaml:"path"`
 }
 
+var moduleFileName = "module.yml"
+
 var fileSystem = os.DirFS(".")
 
 func DiscoverModules(root string) ([]*Module, error) {
@@ -46,7 +48,7 @@ func findModuleYmlFiles(root string) ([]string, error) {
 		if err != nil {
 			return err
 		}
-		if !file.IsDir() && file.Name() == "module.yml" {
+		if !file.IsDir() && file.Name() == moduleFileName {
 			files = append(files, path)
 		}
 		return nil
