@@ -3,6 +3,7 @@ package renderer
 import (
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -10,6 +11,10 @@ import (
 
 	. "github.com/uben01/proto-share/internal/config"
 )
+
+type templateExecutor interface {
+	Execute(wr io.Writer, data any) error
+}
 
 var templateRoot = filepath.Join("assets", "templates")
 
@@ -81,32 +86,42 @@ func walkTemplateDir(fileSystem fs.FS, from string, to string, context *context)
 			return err
 		}
 
-		return createFileFromTemplate(template, to, file.Name(), context)
+		return createFileFromTemplate(
+			template,
+			to,
+			file.Name(),
+			context,
+
+			os.MkdirAll,
+			os.Create,
+		)
 	})
 }
 
-func createFileFromTemplate(
-	t *templ.Template,
+var createFileFromTemplate = func(
+	templateExecutor templateExecutor,
 	outputFilePath string,
 	outputFileName string,
 	context *context,
+
+	mkdirAll func(path string, perm os.FileMode) error,
+	createFile func(path string) (*os.File, error),
 ) error {
-	err := os.MkdirAll(outputFilePath, os.ModePerm)
+	err := mkdirAll(outputFilePath, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
 	var file *os.File
-	file, err = os.Create(filepath.Join(outputFilePath, outputFileName))
+	file, err = createFile(filepath.Join(outputFilePath, outputFileName))
+	defer func() { _ = file.Close() }()
 	if err != nil {
 		return err
 	}
 
-	if err = t.Execute(file, context); err != nil {
+	if err = templateExecutor.Execute(file, context); err != nil {
 		return err
 	}
-
-	err = file.Close()
 
 	return err
 }
