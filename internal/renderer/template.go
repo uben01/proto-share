@@ -76,6 +76,7 @@ var walkTemplateDir = func(
 	context *context,
 ) error {
 	return fs.WalkDir(fileSystem, from, func(templateFilePath string, file os.DirEntry, err error) error {
+		// It's not required to have a template for every language on both the global and module level
 		if errors.Is(err, fs.ErrNotExist) {
 			return nil
 		}
@@ -123,10 +124,10 @@ var createFileFromTemplate = func(
 
 	var file *os.File
 	file, err = createFile(filepath.Join(outputFilePath, outputFileName))
-	defer func() { _ = file.Close() }()
 	if err != nil {
 		return err
 	}
+	defer func() { _ = file.Close() }()
 
 	if err = templateExecutor.Execute(file, context); err != nil {
 		return err
