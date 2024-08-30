@@ -34,7 +34,7 @@ func WriteNewVersionToFile(modules []*Module, inDir string) error {
 	for _, module := range modules {
 		moduleRoot := filepath.Join(inDir, module.Path)
 
-		moduleConfigPath := filepath.Join(moduleRoot, "module.yml")
+		moduleConfigPath := filepath.Join(moduleRoot, moduleFileName)
 		marshaledModule, err := yaml.Marshal(module)
 		if err != nil {
 			return err
@@ -48,7 +48,7 @@ func WriteNewVersionToFile(modules []*Module, inDir string) error {
 	return nil
 }
 
-func computeModuleMD5Hash(moduleRoot string) (string, error) {
+var computeModuleMD5Hash = func(moduleRoot string) (string, error) {
 	var concatenatedHashes string
 
 	err := filepath.Walk(moduleRoot, func(path string, info os.FileInfo, err error) error {
@@ -56,12 +56,12 @@ func computeModuleMD5Hash(moduleRoot string) (string, error) {
 			return err
 		}
 
-		if info.IsDir() || !(filepath.Ext(path) == ".proto") {
+		if filepath.Ext(path) != ".proto" {
 			return nil
 		}
 
-		hash, err := computeMD5Hash(path)
-		if err != nil {
+		var hash string
+		if hash, err = computeFileMD5Hash(path); err != nil {
 			return err
 		}
 		concatenatedHashes += hash
@@ -78,7 +78,7 @@ func computeModuleMD5Hash(moduleRoot string) (string, error) {
 	return hex.EncodeToString(finalHash.Sum(nil)), nil
 }
 
-func computeMD5Hash(filePath string) (string, error) {
+var computeFileMD5Hash = func(filePath string) (string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return "", err
