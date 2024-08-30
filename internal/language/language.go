@@ -21,10 +21,24 @@ func (name Name) String() string {
 }
 
 type Language struct {
-	ModuleCompilePath    string            `yaml:"moduleCompilePath"`
-	ModuleTemplatePath   string            `yaml:"moduleTemplatePath"`
-	SubDir               string            `yaml:"subDirName"`
-	ProtocCommand        string            `yaml:"protocCommand"`
+
+	// protoc output dir:
+	// {config.outDir}/{language.subDir}/{language.moduleCompilePath}
+	ModuleCompilePath string `yaml:"moduleCompilePath"`
+
+	// templates are copied
+	// from `assets/templates/{language}/module`
+	// to 	 `{config.outDir}/{language.subDir}/{language.moduleTemplatePath}`
+	ModuleTemplatePath string `yaml:"moduleTemplatePath"`
+
+	// output subdirectory name for language
+	SubDir string `yaml:"subDirName"`
+
+	// protoc command to generate code for language e.g. `java_out`, `php_out`...
+	ProtocCommand string `yaml:"protocCommand"`
+
+	// additional parameters to be passed for templating
+	// documented for every language, or can be used for custom templates
 	AdditionalParameters map[string]string `yaml:"additionalParameters"`
 }
 
