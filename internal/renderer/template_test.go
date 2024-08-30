@@ -3,9 +3,12 @@ package renderer
 import (
 	"errors"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
+	"testing/fstest"
+	templ "text/template"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -18,6 +21,24 @@ type MockTemplate struct {
 
 func (m *MockTemplate) Execute(wr io.Writer, data interface{}) error {
 	args := m.Called(wr, data)
+
+	return args.Error(0)
+}
+
+// Mock for createFileFromTemplate function
+type MockCreateFileFromTemplate struct {
+	mock.Mock
+}
+
+func (m *MockCreateFileFromTemplate) createFileFromTemplate(
+	tmpl templateExecutor,
+	outputPath string,
+	outputFileName string,
+	context *context,
+	mkdirAll func(string, os.FileMode) error,
+	createFile func(string) (*os.File, error),
+) error {
+	args := m.Called(tmpl, outputPath, outputFileName, context, mkdirAll, createFile)
 
 	return args.Error(0)
 }
@@ -103,6 +124,42 @@ func TestCreateFileFromTemplate_NoErrorsReturned_NilReturned(t *testing.T) {
 	mockTemplate.AssertExpectations(t)
 }
 
+// Tests for the walkTemplateDir function
+
+func TestWalkTemplateDir(t *testing.T) {
+	context := &context{}
+	template := &templ.Template{}
+
+	mockCreateFileFromTemplate := new(MockCreateFileFromTemplate)
+	defer setCreateFileFromTemplateFunc(mockCreateFileFromTemplate)()
+	defer setParseTemplateFunc(template, nil)()
+
+	mockCreateFileFromTemplate.
+		On("createFileFromTemplate", template, "to", "file1.tmpl", context, mock.Anything, mock.Anything).
+		Once().
+		Return(nil)
+	mockCreateFileFromTemplate.
+		On("createFileFromTemplate", template, "to/dir1", "file2.tmpl", context, mock.Anything, mock.Anything).
+		Once().
+		Return(nil)
+	mockCreateFileFromTemplate.
+		On("createFileFromTemplate", template, "to/dir2", "file3.tmpl", context, mock.Anything, mock.Anything).
+		Once().
+		Return(nil)
+
+	testFs := fstest.MapFS{
+		"from/file1.tmpl":      &fstest.MapFile{},
+		"from/dir1/file2.tmpl": &fstest.MapFile{},
+		"from/dir2/file3.tmpl": &fstest.MapFile{},
+	}
+
+	err := walkTemplateDir(testFs, "from", "to", context)
+
+	assert.NoError(t, err)
+	mockCreateFileFromTemplate.AssertNumberOfCalls(t, "createFileFromTemplate", 3)
+	mockCreateFileFromTemplate.AssertExpectations(t)
+}
+
 // Helper methods
 
 func stubMkdirAll(t *testing.T, expectedPath string, expectedPerm os.FileMode) func(string, os.FileMode) error {
@@ -119,5 +176,25 @@ func stubCreateFile(t *testing.T, expectedPath string, returnFile *os.File) func
 		assert.Equal(t, expectedPath, path)
 
 		return returnFile, nil
+	}
+}
+
+func setCreateFileFromTemplateFunc(m *MockCreateFileFromTemplate) func() {
+	originalCreateFileFromTemplate := createFileFromTemplate
+	createFileFromTemplate = m.createFileFromTemplate
+
+	return func() {
+		createFileFromTemplate = originalCreateFileFromTemplate
+	}
+}
+
+func setParseTemplateFunc(template *templ.Template, err error) func() {
+	originalParseTemplate := parseTemplate
+	parseTemplate = func(fs fs.FS, patterns ...string) (*templ.Template, error) {
+		return template, err
+	}
+
+	return func() {
+		parseTemplate = originalParseTemplate
 	}
 }

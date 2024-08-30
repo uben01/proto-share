@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	templ "text/template"
 
 	. "github.com/uben01/proto-share/internal/config"
@@ -17,6 +18,8 @@ type templateExecutor interface {
 }
 
 var templateRoot = filepath.Join("assets", "templates")
+
+var parseTemplate = templ.ParseFS
 
 func RenderTemplates(fileSystem fs.FS, config *Config) error {
 	context := &context{Config: config}
@@ -58,7 +61,12 @@ func RenderTemplates(fileSystem fs.FS, config *Config) error {
 	return nil
 }
 
-func walkTemplateDir(fileSystem fs.FS, from string, to string, context *context) error {
+func walkTemplateDir(
+	fileSystem fs.FS,
+	from string,
+	to string,
+	context *context,
+) error {
 	return fs.WalkDir(fileSystem, from, func(templateFilePath string, file os.DirEntry, err error) error {
 		if errors.Is(err, fs.ErrNotExist) {
 			return nil
@@ -69,26 +77,19 @@ func walkTemplateDir(fileSystem fs.FS, from string, to string, context *context)
 		}
 
 		if file.IsDir() {
-			if templateFilePath == from {
-				return nil
-			}
-
-			err = walkTemplateDir(fileSystem, templateFilePath, filepath.Join(to, file.Name()), context)
-			if err != nil {
-				return err
-			}
-
 			return nil
 		}
 
 		var template *templ.Template
-		if template, err = template.ParseFS(fileSystem, templateFilePath); err != nil {
+		if template, err = parseTemplate(fileSystem, templateFilePath); err != nil {
 			return err
 		}
 
+		dir := strings.TrimPrefix(filepath.Dir(templateFilePath), from)
+
 		return createFileFromTemplate(
 			template,
-			to,
+			filepath.Join(to, dir),
 			file.Name(),
 			context,
 
