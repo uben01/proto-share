@@ -11,10 +11,17 @@ import (
 )
 
 type Config struct {
-	ProjectName string             `yaml:"projectName"`
-	InDir       string             `yaml:"inDir"`
-	OutDir      string             `yaml:"outDir"`
-	Languages   map[Name]*Language `yaml:"languages"`
+	// project name for the build tools
+	ProjectName string `yaml:"projectName"`
+
+	// input directory for the proto files
+	InDir string `yaml:"inDir"`
+
+	// output directory for the generated code
+	OutDir string `yaml:"outDir"`
+
+	// languages to generate code for
+	Languages map[Name]*Language `yaml:"languages"`
 
 	Modules []*Module
 }
