@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -26,8 +27,12 @@ type Config struct {
 	Modules []*Module
 }
 
+var fileSystem = os.DirFS(".")
+
+var mergeWithDefault = MergeWithDefault
+
 func ParseConfig(configPath string) (*Config, error) {
-	data, err := os.ReadFile(configPath)
+	data, err := fs.ReadFile(fileSystem, configPath)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +54,7 @@ func ParseConfig(configPath string) (*Config, error) {
 func mergeConfigWithDefaults(config *Config) error {
 	var mergedLanguages = make(map[Name]*Language, len(config.Languages))
 	for languageName, languageConfig := range config.Languages {
-		lang, err := MergeWithDefault(languageName, languageConfig)
+		lang, err := mergeWithDefault(languageName, languageConfig)
 		if err != nil {
 			return err
 		}
