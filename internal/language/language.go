@@ -32,7 +32,7 @@ func (language Language) GetModuleCompilePath(module *module.Module) string {
 	return strings.ReplaceAll(language.ModuleCompilePath, "{module}", module.Name)
 }
 
-func (language Language) GetTemplateCompilePath(module *module.Module) string {
+func (language Language) GetModuleTemplatePath(module *module.Module) string {
 	return strings.ReplaceAll(language.ModuleTemplatePath, "{module}", module.Name)
 }
 
@@ -78,8 +78,6 @@ func isEmptyValue(v reflect.Value) bool {
 		return v.Len() == 0
 	case reflect.Ptr, reflect.Interface:
 		return v.IsNil()
-	case reflect.Bool:
-		return !v.Bool()
 	default:
 		panic("unhandled default case")
 	}

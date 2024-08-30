@@ -55,7 +55,7 @@ func RenderTemplates(fileSystem fs.FS, config *Config) error {
 
 			fmt.Printf("\tGenerating templates for module: %s\n", module.Name)
 
-			moduleOutputPath := filepath.Join(languageOutputPath, language.GetTemplateCompilePath(module))
+			moduleOutputPath := filepath.Join(languageOutputPath, language.GetModuleTemplatePath(module))
 			if err := walkTemplateDir(
 				fileSystem,
 				templateLanguageModuleRoot,
