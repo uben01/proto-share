@@ -6,7 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"text/template"
+	templ "text/template"
 
 	. "github.com/uben01/proto-share/internal/config"
 )
@@ -24,7 +24,7 @@ func RenderTemplates(fileSystem fs.FS, config *Config) error {
 		languageOutputPath := filepath.Join(config.OutDir, language.SubDir)
 
 		templateLanguageRoot := filepath.Join(templateRoot, languageName.String(), "global")
-		if err := createTemplateFiles(
+		if err := walkTemplateDir(
 			fileSystem,
 			templateLanguageRoot,
 			languageOutputPath,
@@ -40,7 +40,7 @@ func RenderTemplates(fileSystem fs.FS, config *Config) error {
 			fmt.Printf("\tGenerating templates for module: %s\n", module.Name)
 
 			moduleOutputPath := filepath.Join(languageOutputPath, language.GetTemplateCompilePath(module))
-			if err := createTemplateFiles(
+			if err := walkTemplateDir(
 				fileSystem,
 				templateLanguageModuleRoot,
 				moduleOutputPath,
@@ -53,8 +53,8 @@ func RenderTemplates(fileSystem fs.FS, config *Config) error {
 	return nil
 }
 
-func createTemplateFiles(fileSystem fs.FS, from string, to string, context *context) error {
-	return fs.WalkDir(fileSystem, from, func(path string, d os.DirEntry, err error) error {
+func walkTemplateDir(fileSystem fs.FS, from string, to string, context *context) error {
+	return fs.WalkDir(fileSystem, from, func(templateFilePath string, file os.DirEntry, err error) error {
 		if errors.Is(err, fs.ErrNotExist) {
 			return nil
 		}
@@ -63,12 +63,12 @@ func createTemplateFiles(fileSystem fs.FS, from string, to string, context *cont
 			return err
 		}
 
-		if d.IsDir() {
-			if path == from {
+		if file.IsDir() {
+			if templateFilePath == from {
 				return nil
 			}
 
-			err = createTemplateFiles(fileSystem, path, filepath.Join(to, d.Name()), context)
+			err = walkTemplateDir(fileSystem, templateFilePath, filepath.Join(to, file.Name()), context)
 			if err != nil {
 				return err
 			}
@@ -76,31 +76,37 @@ func createTemplateFiles(fileSystem fs.FS, from string, to string, context *cont
 			return nil
 		}
 
-		err = os.MkdirAll(to, os.ModePerm)
-		if err != nil {
+		var template *templ.Template
+		if template, err = template.ParseFS(fileSystem, templateFilePath); err != nil {
 			return err
 		}
 
-		t, err := template.ParseFS(fileSystem, path)
-		if err != nil {
-			return err
-		}
-
-		file, err := os.Create(filepath.Join(to, d.Name()))
-		if err != nil {
-			return err
-		}
-
-		err = t.Execute(file, context)
-		if err != nil {
-			return err
-		}
-
-		err = file.Close()
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return createFileFromTemplate(template, to, file.Name(), context)
 	})
+}
+
+func createFileFromTemplate(
+	t *templ.Template,
+	outputFilePath string,
+	outputFileName string,
+	context *context,
+) error {
+	err := os.MkdirAll(outputFilePath, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	var file *os.File
+	file, err = os.Create(filepath.Join(outputFilePath, outputFileName))
+	if err != nil {
+		return err
+	}
+
+	if err = t.Execute(file, context); err != nil {
+		return err
+	}
+
+	err = file.Close()
+
+	return err
 }
