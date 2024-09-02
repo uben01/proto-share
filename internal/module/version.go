@@ -5,16 +5,22 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
 
+var (
+	marshal   = yaml.Marshal
+	writeFile = os.WriteFile
+)
+
 func UpdateModuleVersions(modules []*Module, inDir string) error {
 	for _, module := range modules {
 		moduleRoot := filepath.Join(inDir, module.Path)
-		hash, err := computeModuleMD5Hash(moduleRoot)
+		hash, err := computeModuleMD5Hash(os.DirFS("."), moduleRoot)
 		if err != nil {
 			return err
 		}
@@ -32,15 +38,13 @@ func UpdateModuleVersions(modules []*Module, inDir string) error {
 
 func WriteNewVersionToFile(modules []*Module, inDir string) error {
 	for _, module := range modules {
-		moduleRoot := filepath.Join(inDir, module.Path)
-
-		moduleConfigPath := filepath.Join(moduleRoot, moduleFileName)
-		marshaledModule, err := yaml.Marshal(module)
+		marshaledModule, err := marshal(module)
 		if err != nil {
 			return err
 		}
 
-		if err := os.WriteFile(moduleConfigPath, marshaledModule, 0666); err != nil {
+		moduleConfigPath := filepath.Join(inDir, module.Path, moduleFileName)
+		if err = writeFile(moduleConfigPath, marshaledModule, 0666); err != nil {
 			return err
 		}
 	}
@@ -48,10 +52,10 @@ func WriteNewVersionToFile(modules []*Module, inDir string) error {
 	return nil
 }
 
-var computeModuleMD5Hash = func(moduleRoot string) (string, error) {
+var computeModuleMD5Hash = func(fileSystem fs.FS, moduleRoot string) (string, error) {
 	var concatenatedHashes string
 
-	err := filepath.Walk(moduleRoot, func(path string, info os.FileInfo, err error) error {
+	err := fs.WalkDir(fileSystem, moduleRoot, func(path string, _ os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -61,7 +65,7 @@ var computeModuleMD5Hash = func(moduleRoot string) (string, error) {
 		}
 
 		var hash string
-		if hash, err = computeFileMD5Hash(path); err != nil {
+		if hash, err = computeFileMD5Hash(fileSystem, path); err != nil {
 			return err
 		}
 		concatenatedHashes += hash
@@ -72,24 +76,25 @@ var computeModuleMD5Hash = func(moduleRoot string) (string, error) {
 		return "", err
 	}
 
+	if concatenatedHashes == "" {
+		return "", fmt.Errorf("no proto files found in %s", moduleRoot)
+	}
+
 	finalHash := md5.New()
 	finalHash.Write([]byte(concatenatedHashes))
 
 	return hex.EncodeToString(finalHash.Sum(nil)), nil
 }
 
-var computeFileMD5Hash = func(filePath string) (string, error) {
-	file, err := os.Open(filePath)
+var computeFileMD5Hash = func(fileSystem fs.FS, filePath string) (string, error) {
+	file, err := fileSystem.Open(filePath)
 	if err != nil {
 		return "", err
 	}
+	defer func() { _ = file.Close() }()
 
 	hash := md5.New()
 	if _, err = io.Copy(hash, file); err != nil {
-		return "", err
-	}
-
-	if err = file.Close(); err != nil {
 		return "", err
 	}
 
