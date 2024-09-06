@@ -101,9 +101,12 @@ ProtocCommand: "ts_out"
 
 ### Templates and pipes
 
-As you can see in the configuration, templates are used to generate the code. Templates will be only evaluated if used
-within a template file and for ModuleTemplatePath and ModuleCompilePath. For these items to be evaluated a
-Context object is passed to the template. The Context object is a struct with the following fields:
+As you can see in the configuration, string templates cam be used to fill certain configs. Strings (possible templates)
+will be only evaluated if used within a template file (located in `assets/templates` directory) and for
+`ModuleTemplatePath`
+and `ModuleCompilePath` config variables.
+For these items to be evaluated a Context object is passed to the template. The Context object is a struct with the
+following fields:
 
 ```go
 type Context struct {
@@ -111,6 +114,34 @@ type Context struct {
 *Language // The language specific configuration
 *Module   // The currently evaluated module
 }
+```
+
+#### Example usages of string templates
+
+```yaml
+# For Java the module compile path by default is defined like this 
+
+ModuleCompilePath: "{{ .Module.Name }}/src/main/java"
+
+# This will result in a layout like this: 
+# {outDir}/java/{module.name}/src/main/java/{generated files}
+```
+
+```gradle
+// For Java the artifact id by default is defined like this
+
+artifactId = '{{ .Language.AdditionalParameters.artifactId | required }}'
+
+// But we want to have a unique artifact id for every module,
+// so we set .Language.AdditionalParameters.artifactId to
+// '{{ .Module.Name | kebabCase }}'
+
+// The given line in `assets/templates/java/module/build.gradle`
+// will be evaluated recursively. The iterations look like this:
+
+artifactId = '{{ .Language.AdditionalParameters.artifactId | required }}' // 1.
+artifactId = '{{ .Module.Name | kebabCase }}' // 2.
+artifactId = 'my-module' // 3.
 ```
 
 You can access the fields of the Context object in the template by using the dot notation, e.g. `{{ .Module.Name }}`
