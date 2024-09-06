@@ -10,7 +10,7 @@ import (
 
 	. "github.com/uben01/proto-share/internal/config"
 	. "github.com/uben01/proto-share/internal/context"
-	"github.com/uben01/proto-share/internal/templating"
+	"github.com/uben01/proto-share/internal/template"
 )
 
 var templateRoot = filepath.Join("assets", "templates")
@@ -48,7 +48,7 @@ func RenderTemplates(fileSystem fs.FS, config *Config) error {
 
 			moduleOutputPath := filepath.Join(
 				languageOutputPath,
-				templating.Must(templating.ProcessTemplateRecursively(language.ModuleTemplatePath, CTX)),
+				template.Must(template.ProcessTemplateRecursively(language.ModuleTemplatePath, CTX)),
 			)
 			if err := walkTemplateDir(
 				fileSystem,

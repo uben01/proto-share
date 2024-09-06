@@ -11,7 +11,7 @@ import (
 	. "github.com/uben01/proto-share/internal/context"
 	. "github.com/uben01/proto-share/internal/language"
 	. "github.com/uben01/proto-share/internal/module"
-	"github.com/uben01/proto-share/internal/templating"
+	"github.com/uben01/proto-share/internal/template"
 )
 
 func CompileModules(config *Config) error {
@@ -69,7 +69,7 @@ func prepareLanguageOutput(
 	pathComponents := []string{
 		config.OutDir,
 		language.SubDir,
-		templating.Must(templating.ProcessTemplateRecursively(language.ModuleCompilePath, CTX)),
+		template.Must(template.ProcessTemplateRecursively(language.ModuleCompilePath, CTX)),
 	}
 
 	languageProtoOutDir := filepath.Join(pathComponents...)
