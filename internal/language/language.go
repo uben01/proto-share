@@ -2,8 +2,9 @@ package language
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
+
+	"dario.cat/mergo"
 
 	"github.com/uben01/proto-share/internal/module"
 )
@@ -63,37 +64,17 @@ func MergeWithDefault(languageName Name, actualLanguage *Language) (*Language, e
 		return nil, fmt.Errorf("unsupported language: %s", languageName)
 	}
 
-	var merged *Language
-	if actualLanguage != nil {
-		merged = actualLanguage
-	} else {
-		merged = &Language{}
+	if actualLanguage == nil {
+		return defaultMapping[languageName], nil
 	}
 
-	defaultVal := reflect.ValueOf(*defaultLanguageConfig)
-	mergedVal := reflect.ValueOf(merged).Elem()
-
-	for i := 0; i < defaultVal.NumField(); i++ {
-		field := defaultVal.Type().Field(i)
-		defaultField := defaultVal.Field(i)
-		mergedField := mergedVal.FieldByName(field.Name)
-
-		if isEmptyValue(mergedField) {
-			mergedField.Set(defaultField)
-		}
+	var merged = &Language{}
+	var err error
+	if err = mergo.Merge(merged, defaultLanguageConfig); err != nil {
+		return nil, err
 	}
 
-	return merged, nil
-}
+	err = mergo.Merge(merged, *actualLanguage, mergo.WithOverride)
 
-func isEmptyValue(v reflect.Value) bool {
-	switch v.Kind() {
-	case reflect.String, reflect.Map, reflect.Slice, reflect.Array:
-		return v.Len() == 0
-	case reflect.Ptr, reflect.Interface:
-		return v.IsNil()
-	default:
-		panic("unhandled default case")
-	}
-	return false
+	return merged, err
 }

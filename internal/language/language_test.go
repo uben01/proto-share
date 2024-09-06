@@ -28,7 +28,7 @@ func TestMergeWithDefault_NoLanguageMapping_ReturnsError(t *testing.T) {
 }
 
 func TestMergeWithDefault_NoActualLanguage_ReturnsDefaultLanguage(t *testing.T) {
-	defer setStubMapping()()
+	defer setStubMapping(stubMapping)()
 
 	merged, err := MergeWithDefault(stubLanguageName, nil)
 
@@ -37,7 +37,7 @@ func TestMergeWithDefault_NoActualLanguage_ReturnsDefaultLanguage(t *testing.T) 
 }
 
 func TestMergeWithDefault_PartialLanguageGiven_ReturnsMergedLanguage(t *testing.T) {
-	defer setStubMapping()()
+	defer setStubMapping(stubMapping)()
 
 	actualLanguage := &Language{
 		SubDir: "actualSubDir",
@@ -52,7 +52,40 @@ func TestMergeWithDefault_PartialLanguageGiven_ReturnsMergedLanguage(t *testing.
 	assert.Equal(t, map[string]string{"myKey": "myValue"}, merged.AdditionalParameters)
 }
 
-func setStubMapping() func() {
+func TestMergeWithDefault_LanguageWithPartialAdditionalParams_AdditionalParamsMergedWell(t *testing.T) {
+	var stubMapping = map[Name]*Language{
+		stubLanguageName: {
+			AdditionalParameters: map[string]string{
+				"myKey":  "defaultValue",
+				"myKey2": "defaultValue2",
+			},
+		},
+	}
+	defer setStubMapping(stubMapping)()
+
+	actualLanguage := &Language{
+		AdditionalParameters: map[string]string{
+			"myKey": "actualValue",
+		},
+	}
+
+	merged, err := MergeWithDefault(stubLanguageName, actualLanguage)
+
+	assert.Nil(t, err)
+	assert.Equal(t, map[string]string{
+		"myKey":  "actualValue",
+		"myKey2": "defaultValue2",
+	}, merged.AdditionalParameters)
+
+	// assert default have not been changed
+	assert.Equal(t, map[string]string{
+		"myKey":  "defaultValue",
+		"myKey2": "defaultValue2",
+	}, stubMapping[stubLanguageName].AdditionalParameters)
+
+}
+
+func setStubMapping(stubMapping map[Name]*Language) func() {
 	originalMapping = defaultMapping
 	defaultMapping = stubMapping
 	return func() { defaultMapping = originalMapping }
