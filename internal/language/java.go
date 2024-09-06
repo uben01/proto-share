@@ -10,7 +10,7 @@ func defaultJava() *Language {
 			"version":            "21",
 			"jarPath":            "${rootDir}/build/libs",
 			"groupId":            "",
-			"artifactId":         "",
+			"artifactId":         "{{ .Module.Name | kebabCase }}",
 			"repositoryUrl":      "",
 			"repositoryUsername": "",
 			"repositoryPassword": "",
