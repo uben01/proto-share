@@ -3,7 +3,6 @@ package renderer
 import (
 	"errors"
 	"fmt"
-	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -12,10 +11,6 @@ import (
 
 	. "github.com/uben01/proto-share/internal/config"
 )
-
-type templateExecutor interface {
-	Execute(wr io.Writer, data any) error
-}
 
 var templateRoot = filepath.Join("assets", "templates")
 
@@ -108,7 +103,7 @@ var walkTemplateDir = func(
 }
 
 var createFileFromTemplate = func(
-	templateExecutor templateExecutor,
+	template *templ.Template,
 	outputFilePath string,
 	outputFileName string,
 	context *context,
@@ -128,9 +123,33 @@ var createFileFromTemplate = func(
 	}
 	defer func() { _ = file.Close() }()
 
-	if err = templateExecutor.Execute(file, context); err != nil {
+	processedTemplate, err := processTemplateRecursively(template, context)
+	if err != nil {
 		return err
 	}
 
+	_, err = file.WriteString(processedTemplate)
+
 	return err
+}
+
+func processTemplateRecursively(
+	template *templ.Template,
+	context *context,
+) (string, error) {
+	var buf strings.Builder
+	if err := template.Execute(&buf, context); err != nil {
+		return "", err
+	}
+
+	if strings.Contains(buf.String(), "{{") {
+		template, err := templ.New("").Funcs(customFunctions).Parse(buf.String())
+		if err != nil {
+			return "", err
+		}
+
+		return processTemplateRecursively(template, context)
+	}
+
+	return buf.String(), nil
 }

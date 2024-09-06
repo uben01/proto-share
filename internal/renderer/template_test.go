@@ -2,12 +2,12 @@ package renderer
 
 import (
 	"errors"
-	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
 	"testing/fstest"
+	templ "text/template"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -16,17 +16,6 @@ import (
 	"github.com/uben01/proto-share/internal/language"
 	"github.com/uben01/proto-share/internal/module"
 )
-
-// Mock for the text/template interface
-type MockTemplate struct {
-	mock.Mock
-}
-
-func (m *MockTemplate) Execute(wr io.Writer, data interface{}) error {
-	args := m.Called(wr, data)
-
-	return args.Error(0)
-}
 
 // Mock for walkTemplateDir function
 type MockWalkTemplateDir struct {
@@ -71,53 +60,6 @@ func TestCreateFileFromTemplate_CreateFileReturnsError_ErrorForwarded(t *testing
 
 	assert.Error(t, err)
 	assert.Equal(t, "failed to create file", err.Error())
-}
-
-func TestCreateFileFromTemplate_ExecuteReturnError_ErrorForwarded(t *testing.T) {
-	fPath := "test"
-	fName := "file.name"
-
-	expectedContext := &context{}
-	expectedFile := &os.File{}
-
-	mockTemplate := new(MockTemplate)
-	mockTemplate.On("Execute", expectedFile, expectedContext).Return(errors.New("failed to execute template"))
-
-	err := createFileFromTemplate(
-		mockTemplate,
-		fPath,
-		fName,
-		expectedContext,
-		stubMkdirAll(t, fPath, os.ModePerm),
-		stubCreateFile(t, filepath.Join(fPath, fName), expectedFile),
-	)
-
-	assert.Error(t, err)
-	assert.Equal(t, "failed to execute template", err.Error())
-	mockTemplate.AssertExpectations(t)
-}
-
-func TestCreateFileFromTemplate_NoErrorsReturned_NilReturned(t *testing.T) {
-	fPath := "test"
-	fName := "file.name"
-
-	expectedContext := &context{}
-	expectedFile := &os.File{}
-
-	mockTemplate := new(MockTemplate)
-	mockTemplate.On("Execute", expectedFile, expectedContext).Return(nil)
-
-	err := createFileFromTemplate(
-		mockTemplate,
-		fPath,
-		fName,
-		expectedContext,
-		stubMkdirAll(t, fPath, os.ModePerm),
-		stubCreateFile(t, filepath.Join(fPath, fName), expectedFile),
-	)
-
-	assert.Nil(t, err)
-	mockTemplate.AssertExpectations(t)
 }
 
 // Tests for RenderTemplates function
@@ -206,6 +148,39 @@ func TestRenderTemplates_multipleLanguagesAndModules_walkTemplateDirCalledForEve
 	mockWalkTemplateDir.AssertExpectations(t)
 }
 
+// Tests for processTemplateRecursively function
+
+func TestProcessTemplateRecursively_OneLevel_OutputReturned(t *testing.T) {
+	templateString := `{{ .Module.Path }}`
+	context := &context{
+		Module: &module.Module{
+			Path: "module",
+		},
+	}
+
+	template, _ := templ.New("").Funcs(customFunctions).Parse(templateString)
+
+	output, err := processTemplateRecursively(template, context)
+	assert.Nil(t, err)
+	assert.Equal(t, "module", output)
+}
+
+func TestProcessTemplateRecursively_TwoLevelsWithCustomFunctions_OutputReturned(t *testing.T) {
+	templateString := `{{ .Module.Path }}`
+	context := &context{
+		Module: &module.Module{
+			Name: "moduleName",
+			Path: "{{ .Module.Name | kebabCase }}",
+		},
+	}
+
+	template, _ := templ.New("").Funcs(customFunctions).Parse(templateString)
+
+	output, err := processTemplateRecursively(template, context)
+	assert.Nil(t, err)
+	assert.Equal(t, "module-name", output)
+}
+
 // Helper methods
 
 func stubMkdirAll(t *testing.T, expectedPath string, expectedPerm os.FileMode) func(string, os.FileMode) error {
@@ -214,14 +189,6 @@ func stubMkdirAll(t *testing.T, expectedPath string, expectedPerm os.FileMode) f
 		assert.Equal(t, expectedPerm, perm)
 
 		return nil
-	}
-}
-
-func stubCreateFile(t *testing.T, expectedPath string, returnFile *os.File) func(string) (*os.File, error) {
-	return func(path string) (*os.File, error) {
-		assert.Equal(t, expectedPath, path)
-
-		return returnFile, nil
 	}
 }
 

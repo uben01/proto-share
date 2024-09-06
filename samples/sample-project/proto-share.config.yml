@@ -6,6 +6,7 @@ languages:
     enablePublish: true
     additionalParameters:
       groupId: "com.example"
+      artifactId: "{{ .Module.Name | required | kebabCase }}"
       repositoryUrl: "https://repo.maven.my.org"
       repositoryUsername: "my_user"
       repositoryPassword: "my_password"

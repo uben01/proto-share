@@ -23,7 +23,7 @@ publishing {
   publications {
     mavenJava(MavenPublication) {
       groupId = '{{ .Language.AdditionalParameters.groupId | required }}'
-      artifactId = '{{ .Module.Name | required | kebabCase }}'
+      artifactId = '{{ .Language.AdditionalParameters.artifactId | required }}'
       version = '{{ .Module.Version }}'
 
       from components.java
