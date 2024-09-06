@@ -1,3 +1,5 @@
+[![Test](https://github.com/uben01/proto-share/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/uben01/proto-share/actions/workflows/test.yml)
+
 # Proto-Share
 
 Proto-Share is a simple tool for sharing prototypes between projects.
