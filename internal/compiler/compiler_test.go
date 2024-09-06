@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	. "github.com/uben01/proto-share/internal/config"
+	. "github.com/uben01/proto-share/internal/context"
 	. "github.com/uben01/proto-share/internal/language"
 	. "github.com/uben01/proto-share/internal/module"
 )
@@ -22,7 +23,7 @@ var (
 
 	testLanguage = Language{
 		SubDir:            "myLang",
-		ModuleCompilePath: "{module}/src/main",
+		ModuleCompilePath: "{{ .Module.Name }}/src/main",
 		ProtocCommand:     "myLangOut",
 	}
 
@@ -124,13 +125,15 @@ func TestCompileProtos_CombinedOutputReturnsNoError_NilReturned(t *testing.T) {
 }
 
 func TestPrepareLanguageOutput_MkdirAllReturnsError_ErrorForwarded(t *testing.T) {
+	CTX = &Context{Language: &testLanguage, Module: &testModule}
+
 	expectedErrorMsg := "stubbed error"
 
 	stubMkdirAll := func(string, os.FileMode) error {
 		return errors.New(expectedErrorMsg)
 	}
 
-	_, err := prepareLanguageOutput(&testConfig, &testLanguage, &testModule, stubMkdirAll)
+	_, err := prepareLanguageOutput(&testConfig, &testLanguage, stubMkdirAll)
 
 	assert.Error(t, err)
 	assert.Equal(t, expectedErrorMsg, err.Error())
@@ -143,7 +146,7 @@ func TestPrepareLanguageOutput_LanguagePathTemplateContainsModule_ModuleNameRepl
 		return nil
 	}
 
-	outputPath, err := prepareLanguageOutput(&testConfig, &testLanguage, &testModule, stubMkdirAll)
+	outputPath, err := prepareLanguageOutput(&testConfig, &testLanguage, stubMkdirAll)
 
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOutputPath, outputPath)

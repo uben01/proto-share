@@ -2,8 +2,8 @@ package language
 
 func defaultJava() *Language {
 	return &Language{
-		ModuleCompilePath:  "{module}/src/main/java",
-		ModuleTemplatePath: "{module}",
+		ModuleCompilePath:  "{{ .Module.Name }}/src/main/java",
+		ModuleTemplatePath: "{{ .Module.Name }}",
 		SubDir:             "java",
 		ProtocCommand:      "java_out",
 		AdditionalParameters: map[string]string{

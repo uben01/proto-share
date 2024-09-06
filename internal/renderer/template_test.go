@@ -95,7 +95,7 @@ func TestRenderTemplates_multipleLanguagesAndModules_walkTemplateDirCalledForEve
 		OutDir: "out",
 		Languages: map[language.Name]*language.Language{
 			"languageName1": {SubDir: "languagename1", ModuleTemplatePath: "module"},
-			"languageName2": {SubDir: "languagename2", ModuleTemplatePath: "{module}"},
+			"languageName2": {SubDir: "languagename2", ModuleTemplatePath: "{{ .Module.Name }}"},
 		}, Modules: []*module.Module{
 			{Name: "module1"},
 			{Name: "module2"},

@@ -11,6 +11,7 @@ import (
 	. "github.com/uben01/proto-share/internal/context"
 	. "github.com/uben01/proto-share/internal/language"
 	. "github.com/uben01/proto-share/internal/module"
+	"github.com/uben01/proto-share/internal/templating"
 )
 
 func CompileModules(config *Config) error {
@@ -33,7 +34,6 @@ func CompileModules(config *Config) error {
 			languageProtoOutDir, err := prepareLanguageOutput(
 				config,
 				language,
-				module,
 				os.MkdirAll,
 			)
 			if err != nil {
@@ -63,14 +63,13 @@ func CompileModules(config *Config) error {
 func prepareLanguageOutput(
 	config *Config,
 	language *Language,
-	module *Module,
 
 	mkdirAll func(string, os.FileMode) error,
 ) (string, error) {
 	pathComponents := []string{
 		config.OutDir,
 		language.SubDir,
-		language.GetModuleCompilePath(module),
+		templating.Must(templating.ProcessTemplateRecursively(language.ModuleCompilePath, CTX)),
 	}
 
 	languageProtoOutDir := filepath.Join(pathComponents...)

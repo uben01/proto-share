@@ -46,7 +46,10 @@ func RenderTemplates(fileSystem fs.FS, config *Config) error {
 
 			fmt.Printf("\tGenerating templates for module: %s\n", module.Name)
 
-			moduleOutputPath := filepath.Join(languageOutputPath, language.GetModuleTemplatePath(module))
+			moduleOutputPath := filepath.Join(
+				languageOutputPath,
+				templating.Must(templating.ProcessTemplateRecursively(language.ModuleTemplatePath, CTX)),
+			)
 			if err := walkTemplateDir(
 				fileSystem,
 				templateLanguageModuleRoot,
@@ -121,7 +124,7 @@ var createFileFromTemplate = func(
 	}
 	defer func() { _ = file.Close() }()
 
-	processedTemplate, err := templating.ProcessTemplateRecursively(fileContent, 0)
+	processedTemplate, err := templating.ProcessTemplateRecursively(fileContent, CTX)
 	if err != nil {
 		return err
 	}

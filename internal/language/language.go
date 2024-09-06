@@ -5,8 +5,6 @@ import (
 	"strings"
 
 	"dario.cat/mergo"
-
-	"github.com/uben01/proto-share/internal/module"
 )
 
 type Name string
@@ -44,14 +42,6 @@ type Language struct {
 	// additional parameters to be passed for templating
 	// documented for every language, or can be used for custom templates
 	AdditionalParameters map[string]string `yaml:"additionalParameters"`
-}
-
-func (language Language) GetModuleCompilePath(module *module.Module) string {
-	return strings.ReplaceAll(language.ModuleCompilePath, "{module}", module.Name)
-}
-
-func (language Language) GetModuleTemplatePath(module *module.Module) string {
-	return strings.ReplaceAll(language.ModuleTemplatePath, "{module}", module.Name)
 }
 
 var defaultMapping = map[Name]*Language{
