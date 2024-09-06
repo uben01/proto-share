@@ -17,6 +17,10 @@ var customFunctions = template.FuncMap{
 func required(v interface{}) interface{} {
 	panicMessage := "Required field not provided. Check your configuration!"
 
+	if v == nil {
+		panic(panicMessage)
+	}
+
 	val := reflect.ValueOf(v)
 	switch val.Kind() {
 	case reflect.String, reflect.Map, reflect.Slice, reflect.Array:
