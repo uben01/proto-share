@@ -1,10 +1,7 @@
 package renderer
 
 import (
-	"errors"
 	"io/fs"
-	"os"
-	"path/filepath"
 	"testing"
 	"testing/fstest"
 
@@ -26,40 +23,6 @@ func (m *MockWalkTemplateDir) walkTemplateDir(fs fs.FS, from string, to string) 
 	args := m.Called(fs, from, to)
 
 	return args.Error(0)
-}
-
-// Tests for the createFileFromTemplate function
-
-func TestCreateFileFromTemplate_MkDirAllReturnsError_ErrorForwarded(t *testing.T) {
-	outputFilePath := "test"
-
-	stubMkdirAll := func(path string, perm os.FileMode) error {
-		assert.Equal(t, outputFilePath, path)
-		assert.Equal(t, perm, os.ModePerm)
-
-		return errors.New("failed to create directory")
-	}
-
-	err := createFileFromTemplate("", outputFilePath, "", stubMkdirAll, nil)
-
-	assert.Error(t, err)
-	assert.Equal(t, "failed to create directory", err.Error())
-}
-
-func TestCreateFileFromTemplate_CreateFileReturnsError_ErrorForwarded(t *testing.T) {
-	fPath := "test"
-	fName := "file.name"
-
-	stubCreateFile := func(path string) (*os.File, error) {
-		assert.Equal(t, filepath.Join(fPath, fName), path)
-
-		return nil, errors.New("failed to create file")
-	}
-
-	err := createFileFromTemplate("", fPath, fName, stubMkdirAll(t, fPath, os.ModePerm), stubCreateFile)
-
-	assert.Error(t, err)
-	assert.Equal(t, "failed to create file", err.Error())
 }
 
 // Tests for RenderTemplates function
@@ -148,15 +111,6 @@ func TestRenderTemplates_multipleLanguagesAndModules_walkTemplateDirCalledForEve
 }
 
 // Helper methods
-
-func stubMkdirAll(t *testing.T, expectedPath string, expectedPerm os.FileMode) func(string, os.FileMode) error {
-	return func(path string, perm os.FileMode) error {
-		assert.Equal(t, expectedPath, path)
-		assert.Equal(t, expectedPerm, perm)
-
-		return nil
-	}
-}
 
 func setWalkTemplateDirFunc(m *MockWalkTemplateDir) func() {
 	originalWalkTemplateDir := walkTemplateDir

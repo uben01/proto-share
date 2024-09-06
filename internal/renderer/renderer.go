@@ -87,49 +87,28 @@ var walkTemplateDir = func(
 		if err != nil {
 			return err
 		}
-		if len(fileContent) == 0 {
-			return nil
+
+		var processedTemplate string
+		processedTemplate, err = template.ProcessTemplateRecursively(string(fileContent), CTX)
+		if err != nil {
+			return err
 		}
 
 		dir := strings.TrimPrefix(filepath.Dir(templateFilePath), from)
 
-		return createFileFromTemplate(
-			string(fileContent),
-			filepath.Join(to, dir),
-			file.Name(),
-
-			os.MkdirAll,
-			os.Create,
-		)
+		return createFileFromTemplate(processedTemplate, filepath.Join(to, dir), file.Name())
 	})
 }
 
 var createFileFromTemplate = func(
-	fileContent string,
+	processedTemplate string,
 	outputFilePath string,
 	outputFileName string,
-
-	mkdirAll func(path string, perm os.FileMode) error,
-	createFile func(path string) (*os.File, error),
 ) error {
-	err := mkdirAll(outputFilePath, os.ModePerm)
+	err := os.MkdirAll(outputFilePath, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	var file *os.File
-	file, err = createFile(filepath.Join(outputFilePath, outputFileName))
-	if err != nil {
-		return err
-	}
-	defer func() { _ = file.Close() }()
-
-	processedTemplate, err := templating.ProcessTemplateRecursively(fileContent, CTX)
-	if err != nil {
-		return err
-	}
-
-	_, err = file.WriteString(processedTemplate)
-
-	return err
+	return os.WriteFile(filepath.Join(outputFilePath, outputFileName), []byte(processedTemplate), os.ModePerm)
 }
