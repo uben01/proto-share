@@ -1,7 +1,6 @@
 # TODO
 
 - [ ] Create integration tests
-- [ ] Create documentation
 - [ ] Handle dependency between modules
     - *option 1: Add `dependencies` field in `module.yml`*
     - *option 2: Read `include` in proto schema*
