@@ -1,6 +1,6 @@
 # TODO
 
-- [ ] Test the functionality
+- [ ] Create integration tests
 - [ ] Create documentation
 - [ ] Handle dependency between modules
     - *option 1: Add `dependencies` field in `module.yml`*

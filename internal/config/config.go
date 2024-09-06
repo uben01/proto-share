@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 
 	. "github.com/uben01/proto-share/internal/language"
 	. "github.com/uben01/proto-share/internal/module"

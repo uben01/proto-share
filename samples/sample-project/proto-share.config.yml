@@ -3,5 +3,11 @@ inDir: "proto"
 outDir: "out"
 languages:
   Java:
+    enablePublish: true
+    additionalParameters:
+      groupId: "com.example"
+      repositoryUrl: "https://repo.maven.my.org"
+      repositoryUsername: "my_user"
+      repositoryPassword: "my_password"
   PHP:
   TypeScript:

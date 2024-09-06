@@ -16,3 +16,29 @@ jar {
 
     destinationDirectory = file("{{ .Language.AdditionalParameters.jarPath }}")
 }
+
+{{ if .Language.EnablePublish }}
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      groupId = '{{ .Language.AdditionalParameters.groupId | required }}'
+      artifactId = '{{ .Module.Name | required | kebabCase }}'
+      version = '{{ .Module.Version }}'
+
+      from components.java
+    }
+  }
+
+  repositories {
+    maven {
+      url '{{ .Language.AdditionalParameters.repositoryUrl | required }}'
+      credentials {
+        username '{{ .Language.AdditionalParameters.repositoryUsername | required }}'
+        password '{{ .Language.AdditionalParameters.repositoryPassword | required }}'
+      }
+    }
+  }
+}
+
+{{ end }}

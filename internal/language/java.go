@@ -7,8 +7,13 @@ func defaultJava() *Language {
 		SubDir:             "java",
 		ProtocCommand:      "java_out",
 		AdditionalParameters: map[string]string{
-			"version": "21",
-			"jarPath": "${rootDir}/build/libs",
+			"version":            "21",
+			"jarPath":            "${rootDir}/build/libs",
+			"groupId":            "",
+			"artifactId":         "",
+			"repositoryUrl":      "",
+			"repositoryUsername": "",
+			"repositoryPassword": "",
 		},
 	}
 }

@@ -29,7 +29,7 @@ type Language struct {
 
 	// templates are copied
 	// from `assets/templates/{language}/module`
-	// to 	 `{config.outDir}/{language.subDir}/{language.moduleTemplatePath}`
+	// to 	`{config.outDir}/{language.subDir}/{language.moduleTemplatePath}`
 	ModuleTemplatePath string `yaml:"moduleTemplatePath"`
 
 	// output subdirectory name for language
@@ -37,6 +37,9 @@ type Language struct {
 
 	// protoc command to generate code for language e.g. `java_out`, `php_out`...
 	ProtocCommand string `yaml:"protocCommand"`
+
+	// generate publish script for language
+	EnablePublish *bool `yaml:"enablePublish"`
 
 	// additional parameters to be passed for templating
 	// documented for every language, or can be used for custom templates

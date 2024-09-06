@@ -19,8 +19,6 @@ type templateExecutor interface {
 
 var templateRoot = filepath.Join("assets", "templates")
 
-var parseTemplate = templ.ParseFS
-
 func RenderTemplates(fileSystem fs.FS, config *Config) error {
 	context := newContext(config)
 
@@ -66,6 +64,7 @@ func RenderTemplates(fileSystem fs.FS, config *Config) error {
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -90,7 +89,7 @@ var walkTemplateDir = func(
 		}
 
 		var template *templ.Template
-		if template, err = parseTemplate(fileSystem, templateFilePath); err != nil {
+		if template, err = templ.New(file.Name()).Funcs(customFunctions).ParseFS(fileSystem, templateFilePath); err != nil {
 			return err
 		}
 
