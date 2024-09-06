@@ -7,16 +7,15 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	templ "text/template"
 
 	. "github.com/uben01/proto-share/internal/config"
+	. "github.com/uben01/proto-share/internal/context"
+	"github.com/uben01/proto-share/internal/templating"
 )
 
 var templateRoot = filepath.Join("assets", "templates")
 
 func RenderTemplates(fileSystem fs.FS, config *Config) error {
-	context := newContext(config)
-
 	if len(config.Languages) == 0 {
 		return fmt.Errorf("no languages found in config")
 	}
@@ -26,7 +25,7 @@ func RenderTemplates(fileSystem fs.FS, config *Config) error {
 	}
 
 	for languageName, language := range config.Languages {
-		context.Language = language
+		CTX.Language = language
 
 		fmt.Printf("Generating templates for language: %s\n", languageName)
 
@@ -37,14 +36,13 @@ func RenderTemplates(fileSystem fs.FS, config *Config) error {
 			fileSystem,
 			templateLanguageRoot,
 			languageOutputPath,
-			context,
 		); err != nil {
 			return err
 		}
 
 		templateLanguageModuleRoot := filepath.Join(templateRoot, languageName.String(), "module")
 		for _, module := range config.Modules {
-			context.Module = module
+			CTX.Module = module
 
 			fmt.Printf("\tGenerating templates for module: %s\n", module.Name)
 
@@ -53,7 +51,6 @@ func RenderTemplates(fileSystem fs.FS, config *Config) error {
 				fileSystem,
 				templateLanguageModuleRoot,
 				moduleOutputPath,
-				context,
 			); err != nil {
 				return err
 			}
@@ -67,7 +64,6 @@ var walkTemplateDir = func(
 	fileSystem fs.FS,
 	from string,
 	to string,
-	context *context,
 ) error {
 	return fs.WalkDir(fileSystem, from, func(templateFilePath string, file os.DirEntry, err error) error {
 		// It's not required to have a template for every language on both the global and module level
@@ -83,18 +79,21 @@ var walkTemplateDir = func(
 			return nil
 		}
 
-		var template *templ.Template
-		if template, err = templ.New(file.Name()).Funcs(customFunctions).ParseFS(fileSystem, templateFilePath); err != nil {
+		var fileContent []byte
+		fileContent, err = fs.ReadFile(fileSystem, templateFilePath)
+		if err != nil {
 			return err
+		}
+		if len(fileContent) == 0 {
+			return nil
 		}
 
 		dir := strings.TrimPrefix(filepath.Dir(templateFilePath), from)
 
 		return createFileFromTemplate(
-			template,
+			string(fileContent),
 			filepath.Join(to, dir),
 			file.Name(),
-			context,
 
 			os.MkdirAll,
 			os.Create,
@@ -103,10 +102,9 @@ var walkTemplateDir = func(
 }
 
 var createFileFromTemplate = func(
-	template *templ.Template,
+	fileContent string,
 	outputFilePath string,
 	outputFileName string,
-	context *context,
 
 	mkdirAll func(path string, perm os.FileMode) error,
 	createFile func(path string) (*os.File, error),
@@ -123,7 +121,7 @@ var createFileFromTemplate = func(
 	}
 	defer func() { _ = file.Close() }()
 
-	processedTemplate, err := processTemplateRecursively(template, context)
+	processedTemplate, err := templating.ProcessTemplateRecursively(fileContent, 0)
 	if err != nil {
 		return err
 	}
@@ -131,25 +129,4 @@ var createFileFromTemplate = func(
 	_, err = file.WriteString(processedTemplate)
 
 	return err
-}
-
-func processTemplateRecursively(
-	template *templ.Template,
-	context *context,
-) (string, error) {
-	var buf strings.Builder
-	if err := template.Execute(&buf, context); err != nil {
-		return "", err
-	}
-
-	if strings.Contains(buf.String(), "{{") {
-		template, err := templ.New("").Funcs(customFunctions).Parse(buf.String())
-		if err != nil {
-			return "", err
-		}
-
-		return processTemplateRecursively(template, context)
-	}
-
-	return buf.String(), nil
 }

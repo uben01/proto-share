@@ -1,4 +1,4 @@
-package renderer
+package templating
 
 import (
 	"reflect"

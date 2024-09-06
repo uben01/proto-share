@@ -7,12 +7,12 @@ import (
 	"path/filepath"
 	"testing"
 	"testing/fstest"
-	templ "text/template"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/uben01/proto-share/internal/config"
+	. "github.com/uben01/proto-share/internal/context"
 	"github.com/uben01/proto-share/internal/language"
 	"github.com/uben01/proto-share/internal/module"
 )
@@ -22,8 +22,8 @@ type MockWalkTemplateDir struct {
 	mock.Mock
 }
 
-func (m *MockWalkTemplateDir) walkTemplateDir(fs fs.FS, from string, to string, context *context) error {
-	args := m.Called(fs, from, to, context)
+func (m *MockWalkTemplateDir) walkTemplateDir(fs fs.FS, from string, to string) error {
+	args := m.Called(fs, from, to)
 
 	return args.Error(0)
 }
@@ -40,7 +40,7 @@ func TestCreateFileFromTemplate_MkDirAllReturnsError_ErrorForwarded(t *testing.T
 		return errors.New("failed to create directory")
 	}
 
-	err := createFileFromTemplate(nil, outputFilePath, "", nil, stubMkdirAll, nil)
+	err := createFileFromTemplate("", outputFilePath, "", stubMkdirAll, nil)
 
 	assert.Error(t, err)
 	assert.Equal(t, "failed to create directory", err.Error())
@@ -56,7 +56,7 @@ func TestCreateFileFromTemplate_CreateFileReturnsError_ErrorForwarded(t *testing
 		return nil, errors.New("failed to create file")
 	}
 
-	err := createFileFromTemplate(nil, fPath, fName, nil, stubMkdirAll(t, fPath, os.ModePerm), stubCreateFile)
+	err := createFileFromTemplate("", fPath, fName, stubMkdirAll(t, fPath, os.ModePerm), stubCreateFile)
 
 	assert.Error(t, err)
 	assert.Equal(t, "failed to create file", err.Error())
@@ -102,8 +102,7 @@ func TestRenderTemplates_multipleLanguagesAndModules_walkTemplateDirCalledForEve
 		},
 	}
 
-	ctx := &context{Config: conf}
-	defer setNewContextFunc(ctx)()
+	CTX = &Context{Config: conf}
 
 	mockWalkTemplateDir := new(MockWalkTemplateDir)
 	setWalkTemplateDirFunc(mockWalkTemplateDir)
@@ -111,32 +110,32 @@ func TestRenderTemplates_multipleLanguagesAndModules_walkTemplateDirCalledForEve
 	testFs := fstest.MapFS{}
 	// Language globals
 	mockWalkTemplateDir.
-		On("walkTemplateDir", testFs, "assets/templates/languagename1/global", "out/languagename1", ctx).
+		On("walkTemplateDir", testFs, "assets/templates/languagename1/global", "out/languagename1").
 		Once().
 		Return(nil)
 	mockWalkTemplateDir.
-		On("walkTemplateDir", testFs, "assets/templates/languagename2/global", "out/languagename2", ctx).
+		On("walkTemplateDir", testFs, "assets/templates/languagename2/global", "out/languagename2").
 		Once().
 		Return(nil)
 
 	// Module for languages
 	mockWalkTemplateDir.
-		On("walkTemplateDir", testFs, "assets/templates/languagename1/module", "out/languagename1/module", ctx).
+		On("walkTemplateDir", testFs, "assets/templates/languagename1/module", "out/languagename1/module").
 		Once().
 		Return(nil)
 
 	mockWalkTemplateDir.
-		On("walkTemplateDir", testFs, "assets/templates/languagename1/module", "out/languagename1/module", ctx).
+		On("walkTemplateDir", testFs, "assets/templates/languagename1/module", "out/languagename1/module").
 		Once().
 		Return(nil)
 
 	mockWalkTemplateDir.
-		On("walkTemplateDir", testFs, "assets/templates/languagename2/module", "out/languagename2/module1", ctx).
+		On("walkTemplateDir", testFs, "assets/templates/languagename2/module", "out/languagename2/module1").
 		Once().
 		Return(nil)
 
 	mockWalkTemplateDir.
-		On("walkTemplateDir", testFs, "assets/templates/languagename2/module", "out/languagename2/module2", ctx).
+		On("walkTemplateDir", testFs, "assets/templates/languagename2/module", "out/languagename2/module2").
 		Once().
 		Return(nil)
 
@@ -148,39 +147,6 @@ func TestRenderTemplates_multipleLanguagesAndModules_walkTemplateDirCalledForEve
 	mockWalkTemplateDir.AssertExpectations(t)
 }
 
-// Tests for processTemplateRecursively function
-
-func TestProcessTemplateRecursively_OneLevel_OutputReturned(t *testing.T) {
-	templateString := `{{ .Module.Path }}`
-	context := &context{
-		Module: &module.Module{
-			Path: "module",
-		},
-	}
-
-	template, _ := templ.New("").Funcs(customFunctions).Parse(templateString)
-
-	output, err := processTemplateRecursively(template, context)
-	assert.Nil(t, err)
-	assert.Equal(t, "module", output)
-}
-
-func TestProcessTemplateRecursively_TwoLevelsWithCustomFunctions_OutputReturned(t *testing.T) {
-	templateString := `{{ .Module.Path }}`
-	context := &context{
-		Module: &module.Module{
-			Name: "moduleName",
-			Path: "{{ .Module.Name | kebabCase }}",
-		},
-	}
-
-	template, _ := templ.New("").Funcs(customFunctions).Parse(templateString)
-
-	output, err := processTemplateRecursively(template, context)
-	assert.Nil(t, err)
-	assert.Equal(t, "module-name", output)
-}
-
 // Helper methods
 
 func stubMkdirAll(t *testing.T, expectedPath string, expectedPerm os.FileMode) func(string, os.FileMode) error {
@@ -189,17 +155,6 @@ func stubMkdirAll(t *testing.T, expectedPath string, expectedPerm os.FileMode) f
 		assert.Equal(t, expectedPerm, perm)
 
 		return nil
-	}
-}
-
-func setNewContextFunc(c *context) func() {
-	originalNewContext := newContext
-	newContext = func(*config.Config) *context {
-		return c
-	}
-
-	return func() {
-		newContext = originalNewContext
 	}
 }
 

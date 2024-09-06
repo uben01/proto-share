@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	. "github.com/uben01/proto-share/internal/config"
+	. "github.com/uben01/proto-share/internal/context"
 	. "github.com/uben01/proto-share/internal/language"
 	. "github.com/uben01/proto-share/internal/module"
 )
@@ -23,8 +24,12 @@ func CompileModules(config *Config) error {
 	}
 
 	for _, module := range config.Modules {
+		CTX.Module = module
+
 		languageOutArgs := make([]string, numberOfLanguages)
 		for _, language := range config.Languages {
+			CTX.Language = language
+
 			languageProtoOutDir, err := prepareLanguageOutput(
 				config,
 				language,

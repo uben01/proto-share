@@ -6,6 +6,7 @@ import (
 
 	. "github.com/uben01/proto-share/internal/compiler"
 	. "github.com/uben01/proto-share/internal/config"
+	. "github.com/uben01/proto-share/internal/context"
 	. "github.com/uben01/proto-share/internal/module"
 	. "github.com/uben01/proto-share/internal/renderer"
 )
@@ -24,6 +25,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	CTX.Config = config
 
 	modules, err := DiscoverModules(config.InDir)
 	if err != nil {
