@@ -10,6 +10,11 @@ type Context struct {
 	Config   *Config
 	Module   *Module
 	Language *Language
+	Env      Environment
 }
 
-var CTX = &Context{}
+var CTX = func() *Context {
+	env := prepareEnvironment()
+
+	return &Context{Env: env}
+}()

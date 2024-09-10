@@ -115,6 +115,7 @@ type Context struct {
 *Config   // The top level of the configuration
 *Language // The language specific configuration
 *Module   // The currently evaluated module
+*Env // Environment variables read from the system and present `.env` file
 }
 ```
 

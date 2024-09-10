@@ -8,6 +8,6 @@ languages:
       groupId: "com.example"
       repositoryUrl: "https://repo.maven.my.org"
       repositoryUsername: "my_user"
-      repositoryPassword: "my_password"
+      repositoryPassword: "{{ .Env.MAVEN_PASSWORD }}"
   PHP:
   TypeScript:
