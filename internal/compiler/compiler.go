@@ -24,7 +24,13 @@ func CompileModules(config *Config) error {
 		return fmt.Errorf("no languages defined")
 	}
 
+	anyChanged := false
 	for _, module := range config.Modules {
+		if !module.Changed {
+			continue
+		}
+		anyChanged = true
+
 		CTX.Module = module
 
 		languageOutArgs := make([]string, numberOfLanguages)
@@ -57,10 +63,14 @@ func CompileModules(config *Config) error {
 		}
 	}
 
+	if !anyChanged {
+		fmt.Println("No output have been generated")
+	}
+
 	return nil
 }
 
-func prepareLanguageOutput(
+var prepareLanguageOutput = func(
 	config *Config,
 	language *Language,
 

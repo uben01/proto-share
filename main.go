@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"flag"
+	"fmt"
 
 	. "github.com/uben01/proto-share/internal/compiler"
 	. "github.com/uben01/proto-share/internal/config"
@@ -35,6 +36,12 @@ func main() {
 
 	if err = UpdateModuleVersions(config.Modules, config.InDir); err != nil {
 		panic(err)
+	}
+
+	if !config.AnyModuleChanged() {
+		fmt.Println("No changes detected. Exiting.")
+
+		return
 	}
 
 	if err = RenderTemplates(embedFileSystem, config); err != nil {

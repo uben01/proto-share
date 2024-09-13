@@ -14,7 +14,7 @@ type Module struct {
 	Version int    `yaml:"version"`
 	Path    string `yaml:"path"`
 
-	changed bool
+	Changed bool `yaml:"-"`
 }
 
 var moduleFileName = "module.yml"

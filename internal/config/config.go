@@ -28,6 +28,16 @@ type Config struct {
 	Modules []*Module
 }
 
+func (c *Config) AnyModuleChanged() bool {
+	for _, module := range c.Modules {
+		if module.Changed {
+			return true
+		}
+	}
+
+	return false
+}
+
 var fileSystem = os.DirFS(".")
 
 var mergeWithDefault = MergeWithDefault

@@ -40,8 +40,8 @@ func TestUpdateModuleVersions_TwoModulesOneWithHashMismatch_HashUpdated(t *testi
 
 func TestWriteNewVersionToFile_TwoModulesFirstMarshalReturnsError_ErrorForwarded(t *testing.T) {
 	modules := []*Module{
-		{Hash: "123", Version: 1, Path: "module1", changed: true},
-		{Hash: "321", Version: 1, Path: "module2", changed: true},
+		{Hash: "123", Version: 1, Path: "module1", Changed: true},
+		{Hash: "321", Version: 1, Path: "module2", Changed: true},
 	}
 
 	defer setMarshalFunc(func(in interface{}) (out []byte, err error) {
@@ -57,7 +57,7 @@ func TestWriteNewVersionToFile_TwoModulesFirstMarshalReturnsError_ErrorForwarded
 
 func TestWriteNewVersionToFile_ModuleChanged_NewVersionWrittenToFile(t *testing.T) {
 	modules := []*Module{
-		{Hash: "123", Version: 1, Path: "modules/module1", changed: true},
+		{Hash: "123", Version: 1, Path: "modules/module1", Changed: true},
 	}
 
 	defer setMarshalFunc(func(in interface{}) (out []byte, err error) {
@@ -78,7 +78,7 @@ func TestWriteNewVersionToFile_ModuleChanged_NewVersionWrittenToFile(t *testing.
 
 func TestWriteNewVersionToFile_ModuleHasNotChanged_DoNothing(t *testing.T) {
 	modules := []*Module{
-		{Hash: "123", Version: 1, Path: "modules/module1", changed: false},
+		{Hash: "123", Version: 1, Path: "modules/module1", Changed: false},
 	}
 
 	defer setMarshalFunc(func(in interface{}) (out []byte, err error) {

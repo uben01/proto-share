@@ -42,6 +42,11 @@ func RenderTemplates(fileSystem fs.FS, config *Config) error {
 
 		templateLanguageModuleRoot := filepath.Join(templateRoot, languageName.String(), "module")
 		for _, module := range config.Modules {
+			if !module.Changed {
+				fmt.Printf("\tModule %s has not been changed\n", module.Name)
+				continue
+			}
+
 			CTX.Module = module
 
 			fmt.Printf("\tGenerating templates for module: %s\n", module.Name)

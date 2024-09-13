@@ -64,6 +64,26 @@ func TestCompileModules_withoutLanguages_returnsError(t *testing.T) {
 	assert.Equal(t, "no languages defined", err.Error())
 }
 
+func TestCompileModules_changedIsFalse_prepareLanguageOutputNotCalled(t *testing.T) {
+	config := &Config{
+		Modules: []*Module{
+			{Changed: false},
+		},
+		Languages: map[Name]*Language{
+			"": {},
+		},
+	}
+
+	defer setStubPrepareLanguageOutput(func(*Config, *Language, func(string, os.FileMode) error) (string, error) {
+		assert.Fail(t, "prepareLanguageOutput should not be called")
+		return "", nil
+	})()
+
+	err := CompileModules(config)
+
+	assert.Nil(t, err)
+}
+
 func TestCompileProtos_executeReturnsNil_ErrorReturned(t *testing.T) {
 	firstLangOut := "myOut"
 	secondLangOut := "myOtherOut"
@@ -150,4 +170,10 @@ func TestPrepareLanguageOutput_LanguagePathTemplateContainsModule_ModuleNameRepl
 
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOutputPath, outputPath)
+}
+
+func setStubPrepareLanguageOutput(f func(*Config, *Language, func(string, os.FileMode) error) (string, error)) func() {
+	originalPrepareLanguageOutput := prepareLanguageOutput
+	prepareLanguageOutput = f
+	return func() { prepareLanguageOutput = originalPrepareLanguageOutput }
 }

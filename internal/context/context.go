@@ -13,8 +13,9 @@ type Context struct {
 	Env      Environment
 }
 
-var CTX = func() *Context {
-	env := prepareEnvironment()
+var CTX *Context
 
-	return &Context{Env: env}
-}()
+func init() {
+	env := prepareEnvironment()
+	CTX = &Context{Env: env}
+}
