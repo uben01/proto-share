@@ -44,7 +44,10 @@ func RenderTemplates(fileSystem fs.FS, config *Config) error {
 		for _, module := range config.Modules {
 			if !module.Changed {
 				fmt.Printf("\tModule %s has not been changed\n", module.Name)
-				continue
+
+				if !config.ForceGeneration {
+					continue
+				}
 			}
 
 			CTX.Module = module

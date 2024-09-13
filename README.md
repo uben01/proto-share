@@ -22,6 +22,7 @@ In every project there has to be a top level config, e.g. `proto-share.config.ym
 projectName: # Name of the project [required]
 inDir: # Directory where the proto files are located [required]
 outDir: # Directory where the generated files should be placed [required]
+forceGeneration: # Force generation of modules even if no changes were detected [default: false]
 languages: # Include which you want to compile to [at least one required]
   Java:
   PHP:
@@ -113,8 +114,8 @@ following fields:
 ```go
 type Context struct {
 *Config   // The top level of the configuration
-*Language // The language specific configuration
-*Module   // The currently evaluated module
+*Language // The config of the currently evaluated language
+*Module   // The config of the currently evaluated module
 *Env // Environment variables read from the system and present `.env` file
 }
 ```

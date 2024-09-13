@@ -26,7 +26,7 @@ func CompileModules(config *Config) error {
 
 	anyChanged := false
 	for _, module := range config.Modules {
-		if !module.Changed {
+		if !module.Changed && !config.ForceGeneration {
 			continue
 		}
 		anyChanged = true

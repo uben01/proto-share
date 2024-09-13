@@ -1,6 +1,7 @@
 projectName: "myProject"
 inDir: "proto"
 outDir: "out"
+forceGeneration: true
 languages:
   Java:
     enablePublish: true

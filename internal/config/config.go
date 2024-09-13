@@ -22,6 +22,9 @@ type Config struct {
 	// output directory for the generated code
 	OutDir string `yaml:"outDir"`
 
+	// force generation of code even if no changes are detected
+	ForceGeneration bool `yaml:"forceGeneration"`
+
 	// languages to generate code for
 	Languages map[Name]*Language `yaml:"languages"`
 

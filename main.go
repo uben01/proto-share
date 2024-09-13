@@ -38,7 +38,7 @@ func main() {
 		panic(err)
 	}
 
-	if !config.AnyModuleChanged() {
+	if !config.AnyModuleChanged() && !config.ForceGeneration {
 		fmt.Println("No changes detected. Exiting.")
 
 		return
