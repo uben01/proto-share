@@ -28,6 +28,7 @@ func UpdateModuleVersions(modules []*Module, inDir string) error {
 		if hash != module.Hash {
 			module.Hash = hash
 			module.Version += 1
+			module.changed = true
 
 			fmt.Printf("Module %s has changed. New version: %d. New hash: %s\n", module.Path, module.Version, hash)
 		}
@@ -38,6 +39,10 @@ func UpdateModuleVersions(modules []*Module, inDir string) error {
 
 func WriteNewVersionToFile(modules []*Module, inDir string) error {
 	for _, module := range modules {
+		if !module.changed {
+			continue
+		}
+
 		marshaledModule, err := marshal(module)
 		if err != nil {
 			return err

@@ -40,8 +40,8 @@ func TestUpdateModuleVersions_TwoModulesOneWithHashMismatch_HashUpdated(t *testi
 
 func TestWriteNewVersionToFile_TwoModulesFirstMarshalReturnsError_ErrorForwarded(t *testing.T) {
 	modules := []*Module{
-		{Hash: "123", Version: 1, Path: "module1"},
-		{Hash: "321", Version: 1, Path: "module2"},
+		{Hash: "123", Version: 1, Path: "module1", changed: true},
+		{Hash: "321", Version: 1, Path: "module2", changed: true},
 	}
 
 	defer setMarshalFunc(func(in interface{}) (out []byte, err error) {
@@ -55,9 +55,9 @@ func TestWriteNewVersionToFile_TwoModulesFirstMarshalReturnsError_ErrorForwarded
 	assert.Equal(t, assert.AnError, err)
 }
 
-func TestWriteNewVersionToFile(t *testing.T) {
+func TestWriteNewVersionToFile_ModuleChanged_NewVersionWrittenToFile(t *testing.T) {
 	modules := []*Module{
-		{Hash: "123", Version: 1, Path: "modules/module1"},
+		{Hash: "123", Version: 1, Path: "modules/module1", changed: true},
 	}
 
 	defer setMarshalFunc(func(in interface{}) (out []byte, err error) {
@@ -69,6 +69,21 @@ func TestWriteNewVersionToFile(t *testing.T) {
 		assert.Equal(t, os.FileMode(0666), perm)
 
 		return nil
+	})()
+
+	err := WriteNewVersionToFile(modules, "in")
+
+	assert.Nil(t, err)
+}
+
+func TestWriteNewVersionToFile_ModuleHasNotChanged_DoNothing(t *testing.T) {
+	modules := []*Module{
+		{Hash: "123", Version: 1, Path: "modules/module1", changed: false},
+	}
+
+	defer setMarshalFunc(func(in interface{}) (out []byte, err error) {
+		assert.Fail(t, "marshal should not be called")
+		return nil, nil
 	})()
 
 	err := WriteNewVersionToFile(modules, "in")

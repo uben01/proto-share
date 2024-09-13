@@ -32,6 +32,7 @@ func TestDiscoverModules_ModuleYamlPresent_ModuleFound(t *testing.T) {
 	assert.Equal(t, "123", modules[0].Hash)
 	assert.Equal(t, 1, modules[0].Version)
 	assert.Equal(t, "a/b", modules[0].Path)
+	assert.Equal(t, false, modules[0].changed)
 }
 
 func TestDiscoverModules_TwoModulesPresent_ModuleCountMatches(t *testing.T) {

@@ -13,6 +13,8 @@ type Module struct {
 	Hash    string `yaml:"hash"`
 	Version int    `yaml:"version"`
 	Path    string `yaml:"path"`
+
+	changed bool
 }
 
 var moduleFileName = "module.yml"
