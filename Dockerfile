@@ -19,3 +19,7 @@ RUN apk add --no-cache \
     npm
 
 RUN npm install -g protoc-gen-ts
+
+WORKDIR /app
+
+ENTRYPOINT ["/bin/proto-share"]

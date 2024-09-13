@@ -11,6 +11,5 @@
     - *dependencies would be clearer*
 - [ ] Add `-verbose` flag. Log info only in case of enabled
 - [ ] Create yml schema validator for module and config
-- [ ] Make docker usage easier
 - [ ] Create module/config file generator
 - [ ] Accept other formats then yml
