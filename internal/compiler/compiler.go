@@ -101,7 +101,7 @@ func compileProtos(
 	protoPathForModule := filepath.Join(config.InDir, module.Path, "*.proto")
 	cmdStr := fmt.Sprintf(
 		"protoc %s -I %s %s",
-		strings.Join(languageOutArgs, " "),
+		strings.Trim(strings.Join(languageOutArgs, " "), " "),
 		config.InDir,
 		protoPathForModule,
 	)
