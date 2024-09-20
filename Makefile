@@ -6,7 +6,7 @@ build:
 	docker build . -t $(IMAGE_NAME)
 
 run:
-	docker run --rm -v ./samples/sample-project:/app $(IMAGE_NAME) "-config=./proto-share.config.yml"
+	docker run --rm -v ./samples/sample-project:/app $(IMAGE_NAME) -config=./proto-share.config.yml -verbose 
 
 test:
 	go test ./...
