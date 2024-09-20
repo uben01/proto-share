@@ -24,12 +24,9 @@ func (p *PlainFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	case logrus.WarnLevel:
 		colorStart = "\033[33m"
 		levelName = "WARN"
-	case logrus.ErrorLevel:
+	case logrus.ErrorLevel, logrus.FatalLevel, logrus.PanicLevel:
 		colorStart = "\033[31m"
 		levelName = "ERROR"
-	case logrus.FatalLevel, logrus.PanicLevel:
-		colorStart = "\033[31m"
-		levelName = "FATAL"
 	}
 	colorEnd = "\033[0m"
 
