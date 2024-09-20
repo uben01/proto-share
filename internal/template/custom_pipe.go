@@ -8,10 +8,11 @@ import (
 )
 
 var customFunctions = template.FuncMap{
-	"required":  required,
-	"kebabCase": strcase.ToKebab,
-	"snakeCase": strcase.ToSnake,
-	"camelCase": strcase.ToCamel,
+	"required":   required,
+	"kebabCase":  strcase.ToKebab,
+	"snakeCase":  strcase.ToSnake,
+	"camelCase":  strcase.ToCamel,
+	"pascalCase": strcase.ToPascal,
 }
 
 func required(v interface{}) interface{} {

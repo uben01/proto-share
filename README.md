@@ -161,6 +161,7 @@ There are also some pipe functions available for the templates. These are:
 - `kebabCase` - Converts a string to kebab case `(kebab-case)`
 - `snakeCase` - Converts a string to snake case `(snake_case)`
 - `camelCase` - Converts a string to camel case `(camelCase)`
+- `pascalCase` - Converts a string to pascal case `(PascalCase)`
 
 ### Modules
 
