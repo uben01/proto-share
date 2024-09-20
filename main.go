@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"flag"
+	"fmt"
 
 	log "github.com/sirupsen/logrus"
 
