@@ -177,15 +177,23 @@ version: # Version of the module - DO NOT CHANGE IT MANUALLY
 
 ## Usage
 
-To generate the code for the supported languages, run the following command:
+To generate the code for the configured languages, run the following command:
 
 ```shell
 $ proto-share -config=${PATH_TO_ROOT_CONFIG}
 ```
 
-When the program runs, it will generate the schema definitions for the supported languages.
+When the program runs, it will generate the schema definitions for the configured languages.
 If the module hash has changed since the last run, the version will be incremented and a new hash will be saved
 upon successful compilation.
+
+### Flags
+
+- `-config={PATH_TO_CONFIG}` - Path to the configuration file -
+  *If not provided, read from stdin*
+- `-verbose` - Set log level to *debug*
+- `-silent` - Set log level to *error*
+- `-help` - Show help message
 
 ### Sample project
 
