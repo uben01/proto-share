@@ -5,6 +5,8 @@ package car_sharing;
 import "car_sharing/car.proto";
 
 // Rental message definition
+option php_namespace = "MyNamespace/CarSharing";
+option java_package = "com.example.carsharing";
 message Rental {
   string id = 1; // Unique identifier for the rental
   Car car = 2; // Car being rented

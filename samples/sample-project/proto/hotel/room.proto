@@ -3,6 +3,8 @@ syntax = "proto3";
 package hotel;
 
 // Room message definition
+option php_namespace = "MyNamespace/Hotel";
+option java_package = "com.example.hotel";
 message Room {
   string id = 1; // Unique identifier for the room
   string type = 2; // Type of the room (e.g., single, double, suite)

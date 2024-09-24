@@ -5,6 +5,8 @@ package hotel;
 import "hotel/room.proto";
 
 // Hotel message definition
+option php_namespace = "MyNamespace/Hotel";
+option java_package = "com.example.hotel";
 message Hotel {
   string id = 1; // Unique identifier for the hotel
   string name = 2; // Name of the hotel

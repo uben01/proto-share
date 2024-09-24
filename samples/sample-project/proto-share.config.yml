@@ -11,4 +11,7 @@ languages:
       repositoryUsername: "my_user"
       repositoryPassword: "{{ .Env.MAVEN_PASSWORD }}"
   PHP:
+    additionalParameters:
+      vendor: "my-company"
+      phpVersion: "8.2"
   TypeScript:

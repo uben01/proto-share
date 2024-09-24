@@ -1,0 +1,13 @@
+{
+  "name": "{{ .Language.AdditionalParameters.vendor | required }}/{{ .Language.AdditionalParameters.moduleName | required }}",
+  "type": "library",
+  "version": "{{ .Module.Version }}",
+  "autoload": {
+    "psr-4": {
+      "": ""
+    }
+  },
+  "require": {
+    "php": "{{ .Language.AdditionalParameters.phpVersion | required }}"
+  }
+}

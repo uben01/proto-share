@@ -87,10 +87,22 @@ AdditionalParameters:
 #### PHP
 
 ```yaml
-ModuleCompilePath: ""
-ModuleTemplatePath: ""
+ModuleCompilePath: "{{ .Module.Name | snakeCase }}"
+ModuleTemplatePath: "{{ .Module.Name | snakeCase }}"
 SubDir: "php"
 ProtocCommand: "php_out"
+AdditionalParameters:
+  # PHP version
+  phpVersion: 8.1,
+
+  # Vendor of the php package
+  vendor:
+
+  # Package name
+  # Name is composed: {vendor}/{moduleName}
+  # https://getcomposer.org/doc/04-schema.md#name
+  moduleName: { { .Module.Name | kebabCase } },
+},
 ```
 
 #### TypeScript

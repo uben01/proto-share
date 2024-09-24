@@ -3,6 +3,8 @@ syntax = "proto3";
 package car_sharing;
 
 // Car message definition
+option php_namespace = "MyNamespace/CarSharing";
+option java_package = "com.example.carsharing";
 message Car {
   string id = 1; // Unique identifier for the car
   string make = 2; // Make of the car
