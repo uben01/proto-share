@@ -4,10 +4,12 @@
   "version": "{{ .Module.Version }}",
   "autoload": {
     "psr-4": {
-      "": ""
+      "": "/src/"
     }
   },
+  "description": "",
   "require": {
-    "php": "{{ .Language.AdditionalParameters.phpVersion | required }}"
+    "php": "{{ .Language.AdditionalParameters.phpVersion | required }}",
+    "protobuf-php/protobuf": "^0.1.3"
   }
 }

@@ -13,5 +13,5 @@ languages:
   PHP:
     additionalParameters:
       vendor: "my-company"
-      phpVersion: "8.2"
+      phpVersion: "^8.3"
   TypeScript:
