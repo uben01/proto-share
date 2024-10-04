@@ -39,21 +39,13 @@ func main() {
 		log.SetLevel(log.InfoLevel)
 	}
 
-	config, err := ParseConfig(*configPath)
-	if err != nil {
-		panic(err)
-	}
+	config := ParseConfig(*configPath)
 	CTX.Config = config
 
-	modules, err := DiscoverModules(config.InDir)
-	if err != nil {
-		panic(err)
-	}
+	modules := DiscoverModules(config.InDir)
 	config.Modules = modules
 
-	if err = UpdateModuleVersions(config.Modules, config.InDir); err != nil {
-		panic(err)
-	}
+	UpdateModuleVersions(config.Modules, config.InDir)
 
 	if !config.AnyModuleChanged() && !config.ForceGeneration {
 		fmt.Println("No changes detected. Exiting.")
@@ -61,15 +53,7 @@ func main() {
 		return
 	}
 
-	if err = RenderTemplates(embedFileSystem, config); err != nil {
-		panic(err)
-	}
-
-	if err = CompileModules(config); err != nil {
-		panic(err)
-	}
-
-	if err = WriteNewVersionToFile(config.Modules, config.InDir); err != nil {
-		panic(err)
-	}
+	RenderTemplates(embedFileSystem, config)
+	CompileModules(config)
+	WriteNewVersionToFile(config.Modules, config.InDir)
 }

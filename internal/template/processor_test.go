@@ -23,8 +23,7 @@ func TestProcessTemplateRecursively_OneLevel_OutputReturned(t *testing.T) {
 		},
 	}
 
-	output, err := ProcessTemplateRecursively(templateString, ctx)
-	assert.Nil(t, err)
+	output := ProcessTemplateRecursively(templateString, ctx)
 	assert.Equal(t, "module", output)
 }
 
@@ -37,12 +36,11 @@ func TestProcessTemplateRecursively_TwoLevelsWithCustomFunctions_OutputReturned(
 		},
 	}
 
-	output, err := ProcessTemplateRecursively(templateString, ctx)
-	assert.Nil(t, err)
+	output := ProcessTemplateRecursively(templateString, ctx)
 	assert.Equal(t, "module-name", output)
 }
 
-func TestProcessTemplateRecursively_InfiniteRecursion_ReturnsAfterMaxDepthReached(t *testing.T) {
+func TestProcessTemplateRecursively_InfiniteRecursion_Panics(t *testing.T) {
 	templateString := `{{ .Module.Path }}`
 	ctx := &ctx{
 		Module: &module{
@@ -50,7 +48,7 @@ func TestProcessTemplateRecursively_InfiniteRecursion_ReturnsAfterMaxDepthReache
 		},
 	}
 
-	_, err := ProcessTemplateRecursively(templateString, ctx)
-	assert.Error(t, err)
-	assert.Equal(t, "max recursion depth (10) exceeded", err.Error())
+	assert.Panics(t, func() {
+		_ = ProcessTemplateRecursively(templateString, ctx)
+	})
 }

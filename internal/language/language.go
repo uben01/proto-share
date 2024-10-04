@@ -1,10 +1,10 @@
 package language
 
 import (
-	"fmt"
 	"strings"
 
 	"dario.cat/mergo"
+	log "github.com/sirupsen/logrus"
 )
 
 type Name string
@@ -50,24 +50,27 @@ var defaultMapping = map[Name]*Language{
 	TypeScript: defaultTS(),
 }
 
-func MergeWithDefault(languageName Name, actualLanguage *Language) (*Language, error) {
+func MergeWithDefault(languageName Name, actualLanguage *Language) *Language {
 	defaultLanguageConfig := defaultMapping[languageName]
 
 	if defaultLanguageConfig == nil {
-		return nil, fmt.Errorf("unsupported language: %s", languageName)
+		log.Panicf("unsupported language: %s", languageName)
 	}
 
 	if actualLanguage == nil {
-		return defaultMapping[languageName], nil
+		return defaultMapping[languageName]
 	}
 
 	var merged = &Language{}
 	var err error
 	if err = mergo.Merge(merged, defaultLanguageConfig); err != nil {
-		return nil, err
+		log.Panicf("failed to merge default language config: %s", err)
 	}
 
 	err = mergo.Merge(merged, *actualLanguage, mergo.WithOverride)
+	if err != nil {
+		log.Panicf("failed to merge actual language config: %s", err)
+	}
 
-	return merged, err
+	return merged
 }

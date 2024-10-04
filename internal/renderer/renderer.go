@@ -2,11 +2,12 @@ package renderer
 
 import (
 	"errors"
-	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	. "github.com/uben01/proto-share/internal/config"
 	. "github.com/uben01/proto-share/internal/context"
@@ -15,35 +16,29 @@ import (
 
 var templateRoot = filepath.Join("assets", "templates")
 
-func RenderTemplates(fileSystem fs.FS, config *Config) error {
+func RenderTemplates(fileSystem fs.FS, config *Config) {
 	if len(config.Languages) == 0 {
-		return fmt.Errorf("no languages found in config")
+		log.Panicf("no languages found in config")
 	}
 
 	if len(config.Modules) == 0 {
-		return fmt.Errorf("no modules found in config")
+		log.Panicf("no modules found in config")
 	}
 
 	for languageName, language := range config.Languages {
 		CTX.Language = language
 
-		fmt.Printf("Generating templates for language: %s\n", languageName)
+		log.Infof("Generating templates for language: %s", languageName)
 
 		languageOutputPath := filepath.Join(config.OutDir, language.SubDir)
 
 		templateLanguageRoot := filepath.Join(templateRoot, languageName.String(), "global")
-		if err := walkTemplateDir(
-			fileSystem,
-			templateLanguageRoot,
-			languageOutputPath,
-		); err != nil {
-			return err
-		}
+		walkTemplateDir(fileSystem, templateLanguageRoot, languageOutputPath)
 
 		templateLanguageModuleRoot := filepath.Join(templateRoot, languageName.String(), "module")
 		for _, module := range config.Modules {
 			if !module.Changed {
-				fmt.Printf("\tModule %s has not been changed\n", module.Name)
+				log.Debugf("Module %s has not been changed", module.Name)
 
 				if !config.ForceGeneration {
 					continue
@@ -51,32 +46,23 @@ func RenderTemplates(fileSystem fs.FS, config *Config) error {
 			}
 
 			CTX.Module = module
-
-			fmt.Printf("\tGenerating templates for module: %s\n", module.Name)
+			log.Infof("Generating templates for module: %s", module.Name)
 
 			moduleOutputPath := filepath.Join(
 				languageOutputPath,
-				template.Must(template.ProcessTemplateRecursively(language.ModuleTemplatePath, CTX)),
+				template.ProcessTemplateRecursively(language.ModuleTemplatePath, CTX),
 			)
-			if err := walkTemplateDir(
-				fileSystem,
-				templateLanguageModuleRoot,
-				moduleOutputPath,
-			); err != nil {
-				return err
-			}
+			walkTemplateDir(fileSystem, templateLanguageModuleRoot, moduleOutputPath)
 		}
 	}
-
-	return nil
 }
 
 var walkTemplateDir = func(
 	fileSystem fs.FS,
 	from string,
 	to string,
-) error {
-	return fs.WalkDir(fileSystem, from, func(templateFilePath string, file os.DirEntry, err error) error {
+) {
+	err := fs.WalkDir(fileSystem, from, func(templateFilePath string, file os.DirEntry, err error) error {
 		// It's not required to have a template for every language on both the global and module level
 		if errors.Is(err, fs.ErrNotExist) {
 			return nil
@@ -93,19 +79,18 @@ var walkTemplateDir = func(
 		var fileContent []byte
 		fileContent, err = fs.ReadFile(fileSystem, templateFilePath)
 		if err != nil {
-			return err
+			log.Panicf("error reading template file: %s", err)
 		}
 
-		var processedTemplate string
-		processedTemplate, err = template.ProcessTemplateRecursively(string(fileContent), CTX)
-		if err != nil {
-			return err
-		}
+		processedTemplate := template.ProcessTemplateRecursively(string(fileContent), CTX)
 
 		dir := strings.TrimPrefix(filepath.Dir(templateFilePath), from)
 
 		return createFileFromTemplate(processedTemplate, filepath.Join(to, dir), file.Name())
 	})
+	if err != nil {
+		log.Panicf("error walking template directory: %s", err)
+	}
 }
 
 var createFileFromTemplate = func(

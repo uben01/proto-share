@@ -16,18 +16,18 @@ type MergeWithDefaultMock struct {
 	mock.Mock
 }
 
-func (m *MergeWithDefaultMock) MergeWithDefault(languageName Name, actualLanguage *Language) (*Language, error) {
+func (m *MergeWithDefaultMock) MergeWithDefault(languageName Name, actualLanguage *Language) *Language {
 	args := m.Called(languageName, actualLanguage)
 
-	return args.Get(0).(*Language), args.Error(1)
+	return args.Get(0).(*Language)
 }
 
-func TestParseConfig_FileNotFound_ErrorReturned(t *testing.T) {
+func TestParseConfig_FileNotFound_Panics(t *testing.T) {
 	defer setFileSystem(fstest.MapFS{})()
 
-	_, err := ParseConfig("config.yaml")
-	assert.Error(t, err)
-	assert.Equal(t, "open config.yaml: file does not exist", err.Error())
+	assert.Panics(t, func() {
+		_ = ParseConfig("config.yaml")
+	})
 }
 
 func TestParseConfig_ConfigContainsLanguages_MergeWithDefaultCalledForEach(t *testing.T) {
@@ -53,9 +53,7 @@ func TestParseConfig_ConfigContainsLanguages_MergeWithDefaultCalledForEach(t *te
 		Once().
 		Return(stubLanguage, nil)
 
-	config, err := ParseConfig(modulePath)
-
-	assert.NoError(t, err)
+	config := ParseConfig(modulePath)
 
 	assert.Equal(t, 1, len(config.Languages))
 	assert.Equal(t, stubLanguage, config.Languages[Java])

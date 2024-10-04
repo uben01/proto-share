@@ -25,8 +25,7 @@ func TestDiscoverModules_ModuleYamlPresent_ModuleFound(t *testing.T) {
 	}
 	defer setFileSystem(testFs)()
 
-	modules, err := DiscoverModules(".")
-	assert.Nil(t, err)
+	modules := DiscoverModules(".")
 
 	assert.Equal(t, "test", modules[0].Name)
 	assert.Equal(t, "123", modules[0].Hash)
@@ -42,10 +41,34 @@ func TestDiscoverModules_TwoModulesPresent_ModuleCountMatches(t *testing.T) {
 	}
 	defer setFileSystem(testFs)()
 
-	modules, err := DiscoverModules(".")
-	assert.Nil(t, err)
-
+	modules := DiscoverModules(".")
 	assert.Equal(t, 2, len(modules))
+}
+
+func TestReadAndParseModuleYml_ModuleYmlCantBeRead_Panics(t *testing.T) {
+	moduleFilePath := "a/b/module.yml"
+	testFs := fstest.MapFS{}
+	defer setFileSystem(testFs)()
+
+	assert.Panics(t, func() {
+		readAndParseModuleYml(moduleFilePath)
+	})
+}
+
+func TestReadAndParseModuleYml_ModuleYmlMalformed_Panics(t *testing.T) {
+	moduleFilePath := "a/b/module.yml"
+	moduleYamlContent := []string{
+		"name=test",
+	}
+
+	testFs := fstest.MapFS{
+		moduleFilePath: &fstest.MapFile{Data: []byte(strings.Join(moduleYamlContent, "\n"))},
+	}
+	defer setFileSystem(testFs)()
+
+	assert.Panics(t, func() {
+		readAndParseModuleYml(moduleFilePath)
+	})
 }
 
 func setFileSystem(fs fs.FS) func() {

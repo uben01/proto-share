@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
+
 	. "github.com/uben01/proto-share/internal/config"
 	. "github.com/uben01/proto-share/internal/context"
 	. "github.com/uben01/proto-share/internal/language"
@@ -14,14 +16,14 @@ import (
 	"github.com/uben01/proto-share/internal/template"
 )
 
-func CompileModules(config *Config) error {
+func CompileModules(config *Config) {
 	if len(config.Modules) == 0 {
-		return fmt.Errorf("no modules defined")
+		log.Panic("no modules defined")
 	}
 
 	numberOfLanguages := len(config.Languages)
 	if numberOfLanguages == 0 {
-		return fmt.Errorf("no languages defined")
+		log.Panic("no languages defined")
 	}
 
 	anyChanged := false
@@ -37,14 +39,11 @@ func CompileModules(config *Config) error {
 		for _, language := range config.Languages {
 			CTX.Language = language
 
-			languageProtoOutDir, err := prepareLanguageOutput(
+			languageProtoOutDir := prepareLanguageOutput(
 				config,
 				language,
 				os.MkdirAll,
 			)
-			if err != nil {
-				return err
-			}
 
 			languageOutArgs = append(
 				languageOutArgs,
@@ -52,22 +51,18 @@ func CompileModules(config *Config) error {
 			)
 		}
 
-		if err := compileProtos(
+		compileProtos(
 			config,
 			module,
 			languageOutArgs,
 			exec.Command,
 			func(cmd *exec.Cmd) ([]byte, error) { return cmd.CombinedOutput() },
-		); err != nil {
-			return err
-		}
+		)
 	}
 
 	if !anyChanged {
-		fmt.Println("No output have been generated")
+		log.Warn("No output have been generated")
 	}
-
-	return nil
 }
 
 var prepareLanguageOutput = func(
@@ -75,19 +70,20 @@ var prepareLanguageOutput = func(
 	language *Language,
 
 	mkdirAll func(string, os.FileMode) error,
-) (string, error) {
+) string {
 	pathComponents := []string{
 		config.OutDir,
 		language.SubDir,
-		template.Must(template.ProcessTemplateRecursively(language.ModuleCompilePath, CTX)),
+		template.ProcessTemplateRecursively(language.ModuleCompilePath, CTX),
 	}
 
 	languageProtoOutDir := filepath.Join(pathComponents...)
 
 	if err := mkdirAll(languageProtoOutDir, os.ModePerm); err != nil {
-		return "", err
+		log.Panicf("failed to create directory: %s", err)
 	}
-	return languageProtoOutDir, nil
+
+	return languageProtoOutDir
 }
 
 func compileProtos(
@@ -97,7 +93,7 @@ func compileProtos(
 
 	execute func(string, ...string) *exec.Cmd,
 	combinedOutput func(cmd *exec.Cmd) ([]byte, error),
-) error {
+) {
 	protoPathForModule := filepath.Join(config.InDir, module.Path, "*.proto")
 	cmdStr := fmt.Sprintf(
 		"protoc %s -I %s %s",
@@ -108,16 +104,14 @@ func compileProtos(
 
 	cmd := execute("sh", "-c", cmdStr)
 	if cmd == nil {
-		return fmt.Errorf("failed to create command: %s", cmdStr)
+		log.Panicf("failed to create command: %s", cmdStr)
 	}
 
-	fmt.Printf("Running command: %s\n", cmdStr)
+	log.Infof("Running command: %s", cmdStr)
 
 	output, err := combinedOutput(cmd)
 	if err != nil {
-		fmt.Println(string(output))
-		return err
+		log.Errorf(string(output))
+		log.Panicf("failed to execute command: %s", err)
 	}
-
-	return nil
 }

@@ -20,19 +20,17 @@ var stubMapping = map[Name]*Language{
 	stubLanguageName: stubLanguageDefault,
 }
 
-func TestMergeWithDefault_NoLanguageMapping_ReturnsError(t *testing.T) {
-	_, err := MergeWithDefault(stubLanguageName, nil)
-
-	assert.NotNil(t, err)
-	assert.Equal(t, "unsupported language: mylanguage", err.Error())
+func TestMergeWithDefault_NoLanguageMapping_Panics(t *testing.T) {
+	assert.Panics(t, func() {
+		_ = MergeWithDefault(stubLanguageName, nil)
+	})
 }
 
 func TestMergeWithDefault_NoActualLanguage_ReturnsDefaultLanguage(t *testing.T) {
 	defer setStubMapping(stubMapping)()
 
-	merged, err := MergeWithDefault(stubLanguageName, nil)
+	merged := MergeWithDefault(stubLanguageName, nil)
 
-	assert.Nil(t, err)
 	assert.Equal(t, stubLanguageDefault, merged)
 }
 
@@ -43,9 +41,8 @@ func TestMergeWithDefault_PartialLanguageGiven_ReturnsMergedLanguage(t *testing.
 		SubDir: "actualSubDir",
 	}
 
-	merged, err := MergeWithDefault(stubLanguageName, actualLanguage)
+	merged := MergeWithDefault(stubLanguageName, actualLanguage)
 
-	assert.Nil(t, err)
 	assert.Equal(t, "actualSubDir", merged.SubDir)
 	assert.Equal(t, "myModulePathTemplate", merged.ModuleTemplatePath)
 	assert.Equal(t, "myProtocCommand", merged.ProtocCommand)
@@ -69,9 +66,8 @@ func TestMergeWithDefault_LanguageWithPartialAdditionalParams_AdditionalParamsMe
 		},
 	}
 
-	merged, err := MergeWithDefault(stubLanguageName, actualLanguage)
+	merged := MergeWithDefault(stubLanguageName, actualLanguage)
 
-	assert.Nil(t, err)
 	assert.Equal(t, map[string]string{
 		"myKey":  "actualValue",
 		"myKey2": "defaultValue2",

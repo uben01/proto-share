@@ -1,9 +1,10 @@
 package module
 
 import (
-	"fmt"
 	"io/fs"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/goccy/go-yaml"
 )
@@ -21,30 +22,23 @@ var moduleFileName = "module.yml"
 
 var fileSystem = os.DirFS(".")
 
-func DiscoverModules(root string) ([]*Module, error) {
-	files, err := findModuleYmlFiles(root)
-	if err != nil {
-		return nil, err
-	}
+func DiscoverModules(root string) []*Module {
+	files := findModuleYmlFiles(root)
 
 	var modules []*Module
 	for _, file := range files {
 		var module *Module
-		module, err = readAndParseModuleYml(file)
+		module = readAndParseModuleYml(file)
 
-		if err != nil {
-			return nil, err
-		}
-
-		fmt.Printf("Module parsed: %v\n", module.Name)
+		log.Debugf("Module parsed: %v", module.Name)
 
 		modules = append(modules, module)
 	}
 
-	return modules, nil
+	return modules
 }
 
-func findModuleYmlFiles(root string) ([]string, error) {
+func findModuleYmlFiles(root string) []string {
 	var files []string
 	err := fs.WalkDir(fileSystem, root, func(path string, file os.DirEntry, err error) error {
 		if err != nil {
@@ -55,20 +49,25 @@ func findModuleYmlFiles(root string) ([]string, error) {
 		}
 		return nil
 	})
-	return files, err
+
+	if err != nil {
+		log.Panicf("Error walking the path %q: %v", root, err)
+	}
+
+	return files
 }
 
-func readAndParseModuleYml(filePath string) (*Module, error) {
+func readAndParseModuleYml(filePath string) *Module {
 	data, err := fs.ReadFile(fileSystem, filePath)
 	if err != nil {
-		return nil, err
+		log.Panicf("Error reading file %q: %v", filePath, err)
 	}
 
 	var module Module
 	err = yaml.Unmarshal(data, &module)
 	if err != nil {
-		return nil, err
+		log.Panicf("Error parsing file %q: %v", filePath, err)
 	}
 
-	return &module, nil
+	return &module
 }

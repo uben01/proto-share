@@ -1,12 +1,12 @@
 package config
 
 import (
-	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 
 	"github.com/goccy/go-yaml"
+	log "github.com/sirupsen/logrus"
 
 	. "github.com/uben01/proto-share/internal/language"
 	. "github.com/uben01/proto-share/internal/module"
@@ -45,36 +45,29 @@ var fileSystem = os.DirFS(".")
 
 var mergeWithDefault = MergeWithDefault
 
-func ParseConfig(configPath string) (*Config, error) {
+func ParseConfig(configPath string) *Config {
 	data, err := fs.ReadFile(fileSystem, filepath.Clean(configPath))
 	if err != nil {
-		return nil, err
+		log.Panicf("Error reading config file: %s: %v", configPath, err)
 	}
 
 	var config Config
 	if err = yaml.Unmarshal(data, &config); err != nil {
-		return nil, err
+		log.Panicf("Failed to parse config file: %s", err)
 	}
 
-	if err = mergeConfigWithDefaults(&config); err != nil {
-		return nil, err
-	}
+	mergeConfigWithDefaults(&config)
 
-	fmt.Printf("Parsed config at: %s\n", configPath)
+	log.Debugf("Parsed config at: %s", configPath)
 
-	return &config, nil
+	return &config
 }
 
-func mergeConfigWithDefaults(config *Config) error {
+func mergeConfigWithDefaults(config *Config) {
 	var mergedLanguages = make(map[Name]*Language, len(config.Languages))
 	for languageName, languageConfig := range config.Languages {
-		lang, err := mergeWithDefault(languageName, languageConfig)
-		if err != nil {
-			return err
-		}
+		lang := mergeWithDefault(languageName, languageConfig)
 		mergedLanguages[languageName] = lang
 	}
 	config.Languages = mergedLanguages
-
-	return nil
 }

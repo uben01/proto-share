@@ -39,18 +39,17 @@ var (
 	}
 )
 
-func TestCompileModules_withoutModules_returnsError(t *testing.T) {
+func TestCompileModules_withoutModules_Panics(t *testing.T) {
 	config := &Config{
 		Modules: []*Module{},
 	}
 
-	err := CompileModules(config)
-
-	assert.NotNil(t, err)
-	assert.Equal(t, "no modules defined", err.Error())
+	assert.Panics(t, func() {
+		CompileModules(config)
+	})
 }
 
-func TestCompileModules_withoutLanguages_returnsError(t *testing.T) {
+func TestCompileModules_withoutLanguages_Panics(t *testing.T) {
 	config := &Config{
 		Modules: []*Module{
 			{},
@@ -58,10 +57,9 @@ func TestCompileModules_withoutLanguages_returnsError(t *testing.T) {
 		Languages: map[Name]*Language{},
 	}
 
-	err := CompileModules(config)
-
-	assert.NotNil(t, err)
-	assert.Equal(t, "no languages defined", err.Error())
+	assert.Panics(t, func() {
+		CompileModules(config)
+	})
 }
 
 func TestCompileModules_changedIsFalse_prepareLanguageOutputNotCalled(t *testing.T) {
@@ -74,17 +72,15 @@ func TestCompileModules_changedIsFalse_prepareLanguageOutputNotCalled(t *testing
 		},
 	}
 
-	defer setStubPrepareLanguageOutput(func(*Config, *Language, func(string, os.FileMode) error) (string, error) {
+	defer setStubPrepareLanguageOutput(func(*Config, *Language, func(string, os.FileMode) error) string {
 		assert.Fail(t, "prepareLanguageOutput should not be called")
-		return "", nil
+		return ""
 	})()
 
-	err := CompileModules(config)
-
-	assert.Nil(t, err)
+	CompileModules(config)
 }
 
-func TestCompileProtos_executeReturnsNil_ErrorReturned(t *testing.T) {
+func TestCompileProtos_executeReturnsNil_Panics(t *testing.T) {
 	firstLangOut := "myOut"
 	secondLangOut := "myOtherOut"
 
@@ -104,13 +100,18 @@ func TestCompileProtos_executeReturnsNil_ErrorReturned(t *testing.T) {
 		return nil
 	}
 
-	err := compileProtos(&testConfig, &testModule, []string{firstLangOut, secondLangOut}, stubExecute, func(cmd *exec.Cmd) ([]byte, error) { return nil, nil })
-
-	assert.Error(t, err)
-	assert.Equal(t, "failed to create command: "+expectedProtocCommand, err.Error())
+	assert.Panics(t, func() {
+		compileProtos(
+			&testConfig,
+			&testModule,
+			[]string{firstLangOut, secondLangOut},
+			stubExecute,
+			func(cmd *exec.Cmd) ([]byte, error) { return nil, nil },
+		)
+	})
 }
 
-func TestCompileProtos_CombinedOutputReturnsError_ErrorForwarded(t *testing.T) {
+func TestCompileProtos_CombinedOutputReturnsError_Panics(t *testing.T) {
 	expectedErrorMsg := "stubbed error"
 
 	cmdMock := &exec.Cmd{}
@@ -123,13 +124,12 @@ func TestCompileProtos_CombinedOutputReturnsError_ErrorForwarded(t *testing.T) {
 		return nil, errors.New(expectedErrorMsg)
 	}
 
-	err := compileProtos(&testConfig, &testModule, []string{"myLangOut"}, stubExecute, stubCombinedOutput)
-
-	assert.Error(t, err)
-	assert.Equal(t, expectedErrorMsg, err.Error())
+	assert.Panics(t, func() {
+		compileProtos(&testConfig, &testModule, []string{"myLangOut"}, stubExecute, stubCombinedOutput)
+	})
 }
 
-func TestCompileProtos_CombinedOutputReturnsNoError_NilReturned(t *testing.T) {
+func TestCompileProtos_CombinedOutputReturnsNoError_notPanics(t *testing.T) {
 	cmdMock := &exec.Cmd{}
 	stubExecute := func(string, ...string) *exec.Cmd {
 		return cmdMock
@@ -139,12 +139,10 @@ func TestCompileProtos_CombinedOutputReturnsNoError_NilReturned(t *testing.T) {
 		return nil, nil
 	}
 
-	err := compileProtos(&testConfig, &testModule, []string{"myLangOut"}, stubExecute, stubCombinedOutput)
-
-	assert.Nil(t, err)
+	compileProtos(&testConfig, &testModule, []string{"myLangOut"}, stubExecute, stubCombinedOutput)
 }
 
-func TestPrepareLanguageOutput_MkdirAllReturnsError_ErrorForwarded(t *testing.T) {
+func TestPrepareLanguageOutput_MkdirAllReturnsError_Panics(t *testing.T) {
 	CTX = &Context{Language: &testLanguage, Module: &testModule}
 
 	expectedErrorMsg := "stubbed error"
@@ -153,10 +151,9 @@ func TestPrepareLanguageOutput_MkdirAllReturnsError_ErrorForwarded(t *testing.T)
 		return errors.New(expectedErrorMsg)
 	}
 
-	_, err := prepareLanguageOutput(&testConfig, &testLanguage, stubMkdirAll)
-
-	assert.Error(t, err)
-	assert.Equal(t, expectedErrorMsg, err.Error())
+	assert.Panics(t, func() {
+		prepareLanguageOutput(&testConfig, &testLanguage, stubMkdirAll)
+	})
 }
 
 func TestPrepareLanguageOutput_LanguagePathTemplateContainsModule_ModuleNameReplaced(t *testing.T) {
@@ -166,13 +163,12 @@ func TestPrepareLanguageOutput_LanguagePathTemplateContainsModule_ModuleNameRepl
 		return nil
 	}
 
-	outputPath, err := prepareLanguageOutput(&testConfig, &testLanguage, stubMkdirAll)
+	outputPath := prepareLanguageOutput(&testConfig, &testLanguage, stubMkdirAll)
 
-	assert.Nil(t, err)
 	assert.Equal(t, expectedOutputPath, outputPath)
 }
 
-func setStubPrepareLanguageOutput(f func(*Config, *Language, func(string, os.FileMode) error) (string, error)) func() {
+func setStubPrepareLanguageOutput(f func(*Config, *Language, func(string, os.FileMode) error) string) func() {
 	originalPrepareLanguageOutput := prepareLanguageOutput
 	prepareLanguageOutput = f
 	return func() { prepareLanguageOutput = originalPrepareLanguageOutput }

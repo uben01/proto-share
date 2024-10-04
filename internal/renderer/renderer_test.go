@@ -19,26 +19,23 @@ type MockWalkTemplateDir struct {
 	mock.Mock
 }
 
-func (m *MockWalkTemplateDir) walkTemplateDir(fs fs.FS, from string, to string) error {
-	args := m.Called(fs, from, to)
-
-	return args.Error(0)
+func (m *MockWalkTemplateDir) walkTemplateDir(fs fs.FS, from string, to string) {
+	m.Called(fs, from, to)
 }
 
 // Tests for RenderTemplates function
 
-func TestRenderTemplates_NoLanguages_ReturnsError(t *testing.T) {
+func TestRenderTemplates_NoLanguages_Panics(t *testing.T) {
 	conf := &config.Config{}
 
 	testFs := fstest.MapFS{}
 
-	err := RenderTemplates(testFs, conf)
-
-	assert.Error(t, err)
-	assert.Equal(t, "no languages found in config", err.Error())
+	assert.Panics(t, func() {
+		RenderTemplates(testFs, conf)
+	})
 }
 
-func TestRenderTemplates_NoModules_ReturnsError(t *testing.T) {
+func TestRenderTemplates_NoModules_Panics(t *testing.T) {
 	conf := &config.Config{
 		Languages: map[language.Name]*language.Language{
 			"test": {},
@@ -47,10 +44,9 @@ func TestRenderTemplates_NoModules_ReturnsError(t *testing.T) {
 
 	testFs := fstest.MapFS{}
 
-	err := RenderTemplates(testFs, conf)
-
-	assert.Error(t, err)
-	assert.Equal(t, "no modules found in config", err.Error())
+	assert.Panics(t, func() {
+		RenderTemplates(testFs, conf)
+	})
 }
 
 func TestRenderTemplates_multipleLanguagesAndModules_walkTemplateDirCalledForEveryCombination(t *testing.T) {
@@ -75,37 +71,29 @@ func TestRenderTemplates_multipleLanguagesAndModules_walkTemplateDirCalledForEve
 	// Language globals
 	mockWalkTemplateDir.
 		On("walkTemplateDir", testFs, "assets/templates/languagename1/global", "out/languagename1").
-		Once().
-		Return(nil)
+		Once()
 	mockWalkTemplateDir.
 		On("walkTemplateDir", testFs, "assets/templates/languagename2/global", "out/languagename2").
-		Once().
-		Return(nil)
+		Once()
 
 	// Module for languages
 	mockWalkTemplateDir.
 		On("walkTemplateDir", testFs, "assets/templates/languagename1/module", "out/languagename1/module").
-		Once().
-		Return(nil)
+		Once()
 
 	mockWalkTemplateDir.
 		On("walkTemplateDir", testFs, "assets/templates/languagename1/module", "out/languagename1/module").
-		Once().
-		Return(nil)
+		Once()
 
 	mockWalkTemplateDir.
 		On("walkTemplateDir", testFs, "assets/templates/languagename2/module", "out/languagename2/module1").
-		Once().
-		Return(nil)
+		Once()
 
 	mockWalkTemplateDir.
 		On("walkTemplateDir", testFs, "assets/templates/languagename2/module", "out/languagename2/module2").
-		Once().
-		Return(nil)
+		Once()
 
-	err := RenderTemplates(testFs, conf)
-
-	assert.Nil(t, err)
+	RenderTemplates(testFs, conf)
 
 	mockWalkTemplateDir.AssertNumberOfCalls(t, "walkTemplateDir", 6)
 	mockWalkTemplateDir.AssertExpectations(t)
