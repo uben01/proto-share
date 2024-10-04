@@ -44,9 +44,6 @@ languages: # Include which you want to compile to [at least one required]
     # protoc command to generate code for language e.g. `java_out`, `php_out`...
     protocCommand:
 
-    # generate publish script for language
-    enablePublish:
-
     # additional parameters to be passed for templating
     # documented for every language
     additionalParameters:
@@ -68,19 +65,22 @@ AdditionalParameters:
   # Java jar output path
   jarPath: "${rootDir}/build/libs"
 
-  # Group id [required if enablePublish: true]
+  # Enable generation of maven publish script
+  enableMavenPublish: false
+
+  # Group id [required if enableMavenPublish: true]
   groupId:
 
-  # Artifact id [required if enablePublish: true]
+  # Artifact id [required if enableMavenPublish: true]
   artifactId: "{{ .Module.Name | kebabCase }}"
 
-  # Artifact repository url [required if enablePublish: true] 
+  # Artifact repository url [required if enableMavenPublish: true] 
   repositoryUrl:
 
-  # Artifact repository username [required if enablePublish: true]
+  # Artifact repository username [required if enableMavenPublish: true]
   repositoryUsername:
 
-  # Artifact repository password [required if enablePublish: true]
+  # Artifact repository password [required if enableMavenPublish: true]
   repositoryPassword: 
 ```
 

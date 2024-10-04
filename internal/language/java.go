@@ -7,13 +7,14 @@ func defaultJava() *Language {
 		SubDir:             "java",
 		ProtocCommand:      "java_out",
 		AdditionalParameters: map[string]string{
-			"version":            "21",
-			"jarPath":            "${rootDir}/build/libs",
-			"groupId":            "",
-			"artifactId":         "{{ .Module.Name | kebabCase }}",
-			"repositoryUrl":      "",
-			"repositoryUsername": "",
-			"repositoryPassword": "",
+			"version":             "21",
+			"jarPath":             "${rootDir}/build/libs",
+			"enableMavenPublish:": "false",
+			"groupId":             "",
+			"artifactId":          "{{ .Module.Name | kebabCase }}",
+			"repositoryUrl":       "",
+			"repositoryUsername":  "",
+			"repositoryPassword":  "",
 		},
 	}
 }
