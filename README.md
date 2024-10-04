@@ -95,10 +95,10 @@ AdditionalParameters:
   # PHP version
   phpVersion: 8.1,
 
-  # Vendor of the php package
+  # Vendor of the php package [required]
   vendor:
 
-  # Package name
+  # Package name [required]
   # Name is composed: {vendor}/{moduleName}
   # https://getcomposer.org/doc/04-schema.md#name
   moduleName: { { .Module.Name | kebabCase } },
