@@ -3,7 +3,6 @@ package main
 import (
 	"embed"
 	"flag"
-	"fmt"
 
 	log "github.com/sirupsen/logrus"
 
@@ -48,7 +47,7 @@ func main() {
 	UpdateModuleVersions(config.Modules, config.InDir)
 
 	if !config.AnyModuleChanged() && !config.ForceGeneration {
-		fmt.Println("No changes detected. Exiting.")
+		log.Warn("No changes detected. Exiting.")
 
 		return
 	}
