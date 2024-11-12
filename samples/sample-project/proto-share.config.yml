@@ -4,8 +4,8 @@ outDir: "out"
 forceGeneration: true
 languages:
   Java:
-    enablePublish: true
     additionalParameters:
+      enableMavenPublish: true
       groupId: "com.example"
       repositoryUrl: "https://repo.maven.my.org"
       repositoryUsername: "my_user"
